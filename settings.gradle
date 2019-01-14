@@ -1,1 +1,1 @@
-include ':annotations', ':processor', ':demo'
+include ':demo'
