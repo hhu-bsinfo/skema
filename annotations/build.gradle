@@ -1,0 +1,7 @@
+apply plugin: 'java'
+
+group = 'de.hhu.bsinfo.autochunk'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
