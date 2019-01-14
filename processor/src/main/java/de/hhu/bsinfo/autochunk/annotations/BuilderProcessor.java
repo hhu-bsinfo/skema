@@ -38,8 +38,7 @@ public class BuilderProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         for(Element element : roundEnvironment.getElementsAnnotatedWith(Builder.class)) {
-            String package
-            Name = elementUtils.getPackageOf(element).getQualifiedName().toString();
+            String packageName = elementUtils.getPackageOf(element).getQualifiedName().toString();
             String className = element.getSimpleName() + "Builder";
             FieldSpec buildable = FieldSpec.builder(ClassName.get(element.asType()),"buildable")
                     .addModifiers(Modifier.PRIVATE)
