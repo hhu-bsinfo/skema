@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.autochunk.demo;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +8,10 @@ import java.util.Map;
 public class SchemaSerializer {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
+
+    private static final long BYTE_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+
+    private static final long INT_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(int[].class);
 
     private static final Map<Class<?>, Schema> SCHEMAS = new HashMap<>();
 
@@ -16,59 +21,95 @@ public class SchemaSerializer {
 
     private SchemaSerializer() {}
 
-    private static Schema getSchema(Class<?> p_class) {
+    public static Schema getSchema(Class<?> p_class) {
         Schema schema = SCHEMAS.get(p_class);
 
         if (schema == null) {
-            throw new IllegalStateException(String.format("No schema for class %s was registered",
+            throw new IllegalArgumentException(String.format("No schema for class %s was registered",
                     p_class.getCanonicalName()));
         }
 
         return schema;
     }
 
-    public static int getSize(Class<?> p_class) {
-        return getSchema(p_class).getSize();
-    }
-
-    public static void serialize(final Object p_object, final ByteBuffer p_buffer) {
+    public static void serialize(final Object p_object, final byte[] p_buffer) {
         Schema schema = getSchema(p_object.getClass());
+        int position = 0;
+        int arraySize;
+        int arrayLength;
+        Object arrayRef;
         for (Schema.FieldSpec fieldSpec : schema.getFields()) {
             switch (fieldSpec.getType()) {
                 case BYTE:
-                    p_buffer.put(UNSAFE.getByte(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(p_object, fieldSpec.getOffset()));
+                    position += Byte.BYTES;
                     break;
                 case SHORT:
-                    p_buffer.putShort(UNSAFE.getShort(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putShort(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getShort(p_object, fieldSpec.getOffset()));
+                    position += Short.BYTES;
                     break;
                 case INT:
-                    p_buffer.putInt(UNSAFE.getInt(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(p_object, fieldSpec.getOffset()));
+                    position += Integer.BYTES;
                     break;
                 case LONG:
-                    p_buffer.putLong(UNSAFE.getLong(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putLong(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getLong(p_object, fieldSpec.getOffset()));
+                    position += Long.BYTES;
                     break;
+                case INT_ARRAY:
+                    arrayRef = ArrayUtil.getArray(p_object, fieldSpec);
+                    arrayLength = Array.getLength(arrayRef);
+                    arraySize = arrayLength * Integer.BYTES;
+                    UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
+                    position += Integer.BYTES;
+                    UNSAFE.copyMemory(arrayRef, INT_ARRAY_OFFSET, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
                 default:
                     break;
             }
         }
     }
 
-    public static void deserialize(final Object p_object, final ByteBuffer p_buffer) {
+    public static void deserialize(final Object p_object, final byte[] p_buffer) {
         Schema schema = getSchema(p_object.getClass());
+        int position = 0;
+        int arrayLength;
         for (Schema.FieldSpec fieldSpec : schema.getFields()) {
             switch (fieldSpec.getType()) {
+
                 case BYTE:
-                    UNSAFE.putByte(p_object, fieldSpec.getOffset(), p_buffer.get());
+                    UNSAFE.putByte(p_object, fieldSpec.getOffset(), UNSAFE.getByte(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Byte.BYTES;
                     break;
+
                 case SHORT:
-                    UNSAFE.putShort(p_object, fieldSpec.getOffset(), p_buffer.getShort());
+                    UNSAFE.putShort(p_object, fieldSpec.getOffset(), UNSAFE.getShort(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Short.BYTES;
                     break;
+
                 case INT:
-                    UNSAFE.putInt(p_object, fieldSpec.getOffset(), p_buffer.getInt());
+                    UNSAFE.putInt(p_object, fieldSpec.getOffset(), UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Integer.BYTES;
                     break;
+
                 case LONG:
-                    UNSAFE.putLong(p_object, fieldSpec.getOffset(), p_buffer.getLong());
+                    UNSAFE.putLong(p_object, fieldSpec.getOffset(), UNSAFE.getLong(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Long.BYTES;
                     break;
+
+                //  Arrays are handled specially since their size is not constant.
+                //
+                //      1. Read length field from buffer
+                //      2. Allocate an array with enough space to store the data
+                //      3. Set the array reference within the object to the allocated array
+
+                case INT_ARRAY:
+                    arrayLength = UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + position);
+                    position += Integer.BYTES;
+                    int[] tmp = new int[arrayLength];
+                    UNSAFE.copyMemory(p_buffer, BYTE_ARRAY_OFFSET + position, tmp, INT_ARRAY_OFFSET, arrayLength * Integer.BYTES);
+                    position += arrayLength * Integer.BYTES;
+                    UNSAFE.putObject(p_object, fieldSpec.getOffset(), tmp);
                 default:
                     break;
             }

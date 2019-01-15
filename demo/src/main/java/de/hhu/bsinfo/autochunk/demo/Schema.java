@@ -32,6 +32,7 @@ public class Schema {
      * @param p_field The field to add.
      */
     public void addField(final Field p_field) {
+        p_field.setAccessible(true);
         FieldSpec fieldSpec = new FieldSpec(
                 FieldType.fromClass(p_field.getType()),
                 m_unsafe.objectFieldOffset(p_field),
@@ -74,9 +75,9 @@ public class Schema {
 
 
 
-    public int getSize() {
+    public int getSize(final Object p_object) {
         return m_fields.stream()
-                .mapToInt(fieldSpec -> fieldSpec.getType().getSize())
+                .mapToInt(p_fieldSpec -> SizeUtil.sizeOf(p_object, p_fieldSpec))
                 .sum();
     }
 
@@ -130,7 +131,7 @@ public class Schema {
 
         @Override
         public String toString() {
-            return String.format("[ %s | %d ] %s", m_type, m_offset, m_name);
+            return m_name;
         }
     }
 

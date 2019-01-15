@@ -1,16 +1,19 @@
 package de.hhu.bsinfo.autochunk.demo;
 
+import java.util.Arrays;
+
 public class Timestamp {
 
-    @Schemable
     private final int m_id;
 
-    @Schemable
     private final long m_value;
 
-    public Timestamp(final int p_id, final long p_value) {
+    private final int[] m_ints;
+
+    public Timestamp(final int p_id, final long p_value, final int[] p_ints) {
         m_id = p_id;
         m_value = p_value;
+        m_ints = p_ints;
     }
 
     public int getId() {
@@ -19,6 +22,10 @@ public class Timestamp {
 
     public long getValue() {
         return m_value;
+    }
+
+    public int[] getInts() {
+        return m_ints;
     }
 
     @Override
@@ -37,5 +44,10 @@ public class Timestamp {
     @Override
     public int hashCode() {
         return Integer.hashCode(m_id);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(m_ints);
     }
 }

@@ -7,8 +7,5 @@ dependencies {
     
     testImplementation 'org.hamcrest:hamcrest-core:2.1'
     testImplementation 'junit:junit:4.12'
-    
-    compileOnly project(':annotations')
-    annotationProcessor project(':processor')
 }
 

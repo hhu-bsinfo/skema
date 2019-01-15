@@ -1,6 +1,7 @@
 package de.hhu.bsinfo.autochunk.demo;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public class SchemaGenerator {
 
@@ -8,7 +9,7 @@ public class SchemaGenerator {
         Field[] fields = p_class.getDeclaredFields();
         Schema schema = new Schema(p_class);
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Schemable.class)) {
+            if (!Modifier.isTransient(field.getModifiers())) {
                 schema.addField(field);
             }
         }
