@@ -15,7 +15,10 @@ public class SizeUtil {
         SIZE_FUNCTIONS[FieldType.SHORT_BOXED.getId()] = ((p_object, p_fieldSpec) -> Short.BYTES);
         SIZE_FUNCTIONS[FieldType.INT_BOXED.getId()] = ((p_object, p_fieldSpec) -> Integer.BYTES);
         SIZE_FUNCTIONS[FieldType.LONG_BOXED.getId()] = ((p_object, p_fieldSpec) -> Long.BYTES);
+        SIZE_FUNCTIONS[FieldType.BYTE_ARRAY.getId()] = SizeUtil::getArraySize;
+        SIZE_FUNCTIONS[FieldType.SHORT_ARRAY.getId()] = SizeUtil::getArraySize;
         SIZE_FUNCTIONS[FieldType.INT_ARRAY.getId()] = SizeUtil::getArraySize;
+        SIZE_FUNCTIONS[FieldType.LONG_ARRAY.getId()] = SizeUtil::getArraySize;
     }
 
     /**

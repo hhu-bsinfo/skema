@@ -16,9 +16,13 @@ public class SchemaSerializerTest {
     }
 
     @Test
-    public void testSerialize() {
-        Timestamp first = new Timestamp(10, 42L, new int[]{1, 2, 3});
-        Timestamp second = new Timestamp(20, 41L, null);
+    public void testSerialize() throws InstantiationException {
+
+        sun.misc.Unsafe unsafe = UnsafeProvider.getUnsafe();
+
+        Timestamp first = new Timestamp(10, 42L, new int[]{1, 2, 3}, new long[]{0L, 20L, 40L});
+        Timestamp second = new Timestamp(-1, -1, null, null);
+        Timestamp third = (Timestamp) unsafe.allocateInstance(Timestamp.class);
 
         Schema schema = SchemaSerializer.getSchema(Timestamp.class);
         int bufferSize = schema.getSize(first);
@@ -28,14 +32,20 @@ public class SchemaSerializerTest {
         byte[] buffer = new byte[bufferSize];
         SchemaSerializer.serialize(first, buffer);
         SchemaSerializer.deserialize(second, buffer);
+        SchemaSerializer.deserialize(third, buffer);
 
-        System.out.printf("A : {id: %d, value: %d, ints: %s}\n",
-                first.getId(), first.getValue(), Arrays.toString(first.getInts()));
+        System.out.printf("A : {id: %d, value: %d, ints: %s, longs: %s}\n",
+                first.getId(), first.getValue(), Arrays.toString(first.getInts()), Arrays.toString(first.getLongs()));
 
-        System.out.printf("B : {id: %d, value: %d, ints: %s}\n",
-                second.getId(), second.getValue(), Arrays.toString(second.getInts()));
+        System.out.printf("B : {id: %d, value: %d, ints: %s, longs: %s}\n",
+                second.getId(), second.getValue(), Arrays.toString(second.getInts()), Arrays.toString(second.getLongs()));
+
+        System.out.printf("C : {id: %d, value: %d, ints: %s, longs: %s}\n",
+                third.getId(), third.getValue(), Arrays.toString(third.getInts()), Arrays.toString(third.getLongs()));
 
         assertEquals(first, second);
+        assertEquals(first, third);
+        assertEquals(second, third);
     }
 
 }

@@ -10,10 +10,13 @@ public class Timestamp {
 
     private final int[] m_ints;
 
-    public Timestamp(final int p_id, final long p_value, final int[] p_ints) {
+    private final long[] m_longs;
+
+    public Timestamp(final int p_id, final long p_value, final int[] p_ints, final long[] p_longs) {
         m_id = p_id;
         m_value = p_value;
         m_ints = p_ints;
+        m_longs = p_longs;
     }
 
     public int getId() {
@@ -26,6 +29,10 @@ public class Timestamp {
 
     public int[] getInts() {
         return m_ints;
+    }
+
+    public long[] getLongs() {
+        return m_longs;
     }
 
     @Override
@@ -48,6 +55,6 @@ public class Timestamp {
 
     @Override
     public String toString() {
-        return Arrays.toString(m_ints);
+        return Arrays.toString(m_ints) + Arrays.toString(m_longs);
     }
 }
