@@ -1,12 +1,17 @@
-package de.hhu.bsinfo.autochunk.demo;
+package de.hhu.bsinfo.autochunk.demo.util;
 
 import java.lang.reflect.Field;
 
 import sun.misc.Unsafe;
 
-public class UnsafeProvider {
+/**
+ * Utility class for accessing sun.misc.Unsafe using Reflection.
+ */
+public final class UnsafeProvider {
 
-    private static final sun.misc.Unsafe m_unsafe = initUnsafe();
+    private static final sun.misc.Unsafe UNSAFE = initUnsafe();
+
+    private UnsafeProvider() {}
 
     private static sun.misc.Unsafe initUnsafe() {
         try {
@@ -18,7 +23,12 @@ public class UnsafeProvider {
         }
     }
 
+    /**
+     * Returns an instance of sun.misc.Unsafe.
+     *
+     * @return An instance of sun.misc.Unsafe.
+     */
     public static sun.misc.Unsafe getUnsafe() {
-        return m_unsafe;
+        return UNSAFE;
     }
 }

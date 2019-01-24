@@ -1,29 +1,51 @@
-package de.hhu.bsinfo.autochunk.demo;
+package de.hhu.bsinfo.autochunk.demo.schema;
 
 import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.hhu.bsinfo.autochunk.demo.util.FieldType;
+import de.hhu.bsinfo.autochunk.demo.util.SizeUtil;
+import de.hhu.bsinfo.autochunk.demo.util.UnsafeProvider;
+
+/**
+ * Describes the structure of a specific class.
+ */
 public class Schema {
 
     /**
      * The class this schema describes.
      */
-    private final Class<?> m_parent;
+    private final Class<?> m_class;
 
     /**
-     * A set containing all field specifications within this schema.
+     * A sorted set containing all field specifications within this schema.
      */
     private final Set<FieldSpec> m_fields = new TreeSet<>(Comparator.comparing(FieldSpec::getName));
 
     /**
      * The unsafe instance for schema generation.
      */
-    private static final sun.misc.Unsafe m_unsafe = UnsafeProvider.getUnsafe();
+    private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
 
-    public Schema(final Class<?> p_parent) {
-        m_parent = p_parent;
+    /**
+     * The constant size of the class this schema describes.
+     */
+    private int m_constantSize = 0;
+
+    /**
+     * Indicates if all fields contained within this schema and all children schemes have a constant size.
+     */
+    private boolean m_isConstant = false;
+
+    /**
+     * Creates a new Schema instance for the provided class.
+     *
+     * @param p_class The class described by this schema instance.
+     */
+    public Schema(final Class<?> p_class) {
+        m_class = p_class;
     }
 
     /**
@@ -35,15 +57,24 @@ public class Schema {
         p_field.setAccessible(true);
         FieldSpec fieldSpec = new FieldSpec(
                 FieldType.fromClass(p_field.getType()),
-                m_unsafe.objectFieldOffset(p_field),
+                UNSAFE.objectFieldOffset(p_field),
                 p_field.getName(),
                 p_field);
 
-        if (fieldSpec.getType() == FieldType.UNKNOWN) {
-            throw new IllegalArgumentException(String.format("%s is not yet supported", p_field.getType().getCanonicalName()));
+        if (fieldSpec.hasConstantSize()) {
+            m_constantSize += SizeUtil.constantSizeOf(fieldSpec);
         }
 
         m_fields.add(fieldSpec);
+
+        onFieldsUpdated();
+    }
+
+    /**
+     * Called whenever the fields of this schema are updated.
+     */
+    private void onFieldsUpdated() {
+        m_isConstant = m_fields.stream().allMatch(FieldSpec::hasConstantSize);
     }
 
     @Override
@@ -51,10 +82,10 @@ public class Schema {
         StringBuilder builder = new StringBuilder();
 
         // Add header
-        builder.append(m_parent.getCanonicalName()).append('\n');
+        builder.append(m_class.getCanonicalName()).append('\n');
 
         // Add rule below header
-        for (int i = 0; i < m_parent.getCanonicalName().length(); i++) {
+        for (int i = 0; i < m_class.getCanonicalName().length(); i++) {
             builder.append('-');
         }
 
@@ -69,16 +100,34 @@ public class Schema {
         return builder.toString();
     }
 
+    /**
+     * Returns a set containing all field specifications within this schema.
+     *
+     * @return A set containing all field specifications within this schema.
+     */
     public Set<FieldSpec> getFields() {
         return m_fields;
     }
 
-
-
+    /**
+     * Calculates an object's size using this schema.
+     *
+     * @param p_object The object.
+     * @return The object's size in bytes.
+     */
     public int getSize(final Object p_object) {
-        return m_fields.stream()
+        return m_isConstant ? m_constantSize : m_fields.stream()
+                .filter(p_fieldSpec -> !p_fieldSpec.hasConstantSize())
                 .mapToInt(p_fieldSpec -> SizeUtil.sizeOf(p_object, p_fieldSpec))
-                .sum();
+                .sum() + m_constantSize;
+    }
+
+    public boolean isConstant() {
+        return m_isConstant;
+    }
+
+    public Class<?> getTarget() {
+        return m_class;
     }
 
     /**
@@ -127,6 +176,10 @@ public class Schema {
 
         public Field getField() {
             return m_field;
+        }
+
+        public boolean hasConstantSize() {
+            return m_type.hasConstantSize();
         }
 
         @Override

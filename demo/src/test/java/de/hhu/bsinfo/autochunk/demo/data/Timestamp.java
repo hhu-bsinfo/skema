@@ -1,6 +1,8 @@
-package de.hhu.bsinfo.autochunk.demo;
+package de.hhu.bsinfo.autochunk.demo.data;
 
 import java.util.Arrays;
+
+import de.hhu.bsinfo.autochunk.demo.util.RandomUtil;
 
 public class Timestamp {
 
@@ -53,8 +55,12 @@ public class Timestamp {
         return Integer.hashCode(m_id);
     }
 
+    public static Timestamp random() {
+        return new Timestamp(RandomUtil.randomInt(), RandomUtil.randomLong(), RandomUtil.randomIntArray(128), RandomUtil.randomLongArray(128));
+    }
+
     @Override
     public String toString() {
-        return Arrays.toString(m_ints) + Arrays.toString(m_longs);
+        return getClass().getSimpleName();
     }
 }

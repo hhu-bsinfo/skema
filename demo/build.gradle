@@ -10,5 +10,7 @@ dependencies {
     
     testImplementation 'org.hamcrest:hamcrest-core:2.1'
     testImplementation 'junit:junit:4.12'
+    
+    jmh 'com.esotericsoftware:kryo:4.0.2'
 }
 
