@@ -14,6 +14,10 @@ public class Timestamp {
 
     private final long[] m_longs;
 
+    public Timestamp() {
+        this(0, 0, new int[0], new long[0]);
+    }
+
     public Timestamp(final int p_id, final long p_value, final int[] p_ints, final long[] p_longs) {
         m_id = p_id;
         m_value = p_value;
