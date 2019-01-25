@@ -1,6 +1,5 @@
 package de.hhu.bsinfo.autochunk.demo;
 
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -32,9 +31,10 @@ public class SchemaSerializerBenchmark {
     @State(Scope.Thread)
     public static class KryoState {
 
-        public Timestamp data = new Timestamp(100, 100, new int[]{1, 2, 3}, new long[]{6, 8, 3});
         public final Kryo kryo = new Kryo();
         public final UnsafeOutput output = new UnsafeOutput(128);
+
+        public Timestamp data = new Timestamp(100, 100, new int[]{1, 2, 3}, new long[]{6, 8, 3});
         public UnsafeInput input;
 
         @Setup(Level.Trial)
@@ -51,7 +51,7 @@ public class SchemaSerializerBenchmark {
     }
 
     @State(Scope.Thread)
-    public static class SerializerState {
+    public static class SchemaState {
 
         public Timestamp data = new Timestamp(100, 100, new int[]{1, 2, 3}, new long[]{6, 8, 3});
         public byte[] buffer;
@@ -71,11 +71,11 @@ public class SchemaSerializerBenchmark {
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 1, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
+    @Warmup(iterations = 3, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 5, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Threads(1)
-    public byte[] serializeSchema(SerializerState p_state) {
+    public byte[] serializeSchema(SchemaState p_state) {
         int size = p_state.schema.getSize(p_state.data);
         byte[] buffer = new byte[size];
         SchemaSerializer.serialize(p_state.data, buffer);
@@ -84,19 +84,19 @@ public class SchemaSerializerBenchmark {
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 1, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
+    @Warmup(iterations = 3, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 5, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Threads(1)
-    public Timestamp deserializeSchema(SerializerState p_state) {
+    public Timestamp deserializeSchema(SchemaState p_state) {
         p_state.data = SchemaSerializer.deserialize(Timestamp.class, p_state.buffer);
         return p_state.data;
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 1, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
+    @Warmup(iterations = 3, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 5, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Threads(1)
     public byte[] serializeKryo(KryoState p_state) {
@@ -107,8 +107,8 @@ public class SchemaSerializerBenchmark {
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-    @Measurement(iterations = 1, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
+    @Warmup(iterations = 3, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 5, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Threads(1)
     public Timestamp deserializeKryo(KryoState p_state) {

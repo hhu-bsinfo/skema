@@ -116,10 +116,18 @@ public class Schema {
      * @return The object's size in bytes.
      */
     public int getSize(final Object p_object) {
-        return m_isConstant ? m_constantSize : m_fields.stream()
-                .filter(p_fieldSpec -> !p_fieldSpec.hasConstantSize())
-                .mapToInt(p_fieldSpec -> SizeUtil.sizeOf(p_object, p_fieldSpec))
-                .sum() + m_constantSize;
+        if (m_isConstant) {
+            return m_constantSize;
+        }
+
+        int size = 0;
+        for (FieldSpec fieldSpec : m_fields) {
+            if (!fieldSpec.hasConstantSize()) {
+                size += SizeUtil.sizeOf(p_object, fieldSpec);
+            }
+        }
+
+        return size + m_constantSize;
     }
 
     public boolean isConstant() {

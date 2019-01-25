@@ -10,6 +10,7 @@ import de.hhu.bsinfo.autochunk.demo.schema.ObjectSchema;
 import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 import de.hhu.bsinfo.autochunk.demo.util.FieldUtil;
 import de.hhu.bsinfo.autochunk.demo.util.PartialObject;
+import de.hhu.bsinfo.autochunk.demo.util.SizeUtil;
 import de.hhu.bsinfo.autochunk.demo.util.UnsafeProvider;
 
 @SuppressWarnings("WeakerAccess")
@@ -147,7 +148,7 @@ public final class SchemaSerializer {
 
                 case BYTE_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Byte.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;
@@ -157,7 +158,7 @@ public final class SchemaSerializer {
 
                 case CHAR_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Character.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;
@@ -167,7 +168,7 @@ public final class SchemaSerializer {
 
                 case SHORT_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Short.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;
@@ -177,7 +178,7 @@ public final class SchemaSerializer {
 
                 case INT_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Integer.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;
@@ -187,7 +188,7 @@ public final class SchemaSerializer {
 
                 case LONG_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Long.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;
@@ -197,7 +198,7 @@ public final class SchemaSerializer {
 
                 case FLOAT_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Float.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;
@@ -207,7 +208,7 @@ public final class SchemaSerializer {
 
                 case DOUBLE_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Double.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;
@@ -217,7 +218,7 @@ public final class SchemaSerializer {
 
                 case BOOLEAN_ARRAY:
                     object = FieldUtil.getObject(p_object, fieldSpec);
-                    arrayLength = Array.getLength(object);
+                    arrayLength = SizeUtil.getArrayLength(object);
                     arraySize = arrayLength * Byte.BYTES;
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, arrayLength);
                     position += Integer.BYTES;

@@ -11,6 +11,12 @@ import de.hhu.bsinfo.autochunk.demo.SchemaSerializer;
  */
 public final class SizeUtil {
 
+    private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
+
+    // All array base offsets are equal to 16 and the
+    // length field is right in front of them (for now)
+    private static final long ARRAY_LENGTH_OFFSET = 12;
+
     private static final int NO_SIZE = 0;
 
     private static final SizeFunction[] SIZE_FUNCTIONS = new SizeFunction[FieldType.values().length];
@@ -75,7 +81,11 @@ public final class SizeUtil {
      */
     public static int getArraySize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
         Object array = FieldUtil.getObject(p_object, p_fieldSpec);
-        return getArraySize(Array.getLength(array), p_fieldSpec);
+        return getArraySize(getArrayLength(array), p_fieldSpec);
+    }
+
+    public static int getArrayLength(final Object p_array) {
+        return UNSAFE.getInt(p_array, ARRAY_LENGTH_OFFSET);
     }
 
     /**
