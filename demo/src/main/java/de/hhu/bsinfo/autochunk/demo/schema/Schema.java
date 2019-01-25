@@ -1,7 +1,9 @@
 package de.hhu.bsinfo.autochunk.demo.schema;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -23,6 +25,11 @@ public class Schema {
      * A sorted set containing all field specifications within this schema.
      */
     private final Set<FieldSpec> m_fields = new TreeSet<>(Comparator.comparing(FieldSpec::getName));
+
+    /**
+     * A cached iterator instance to prevent instance creation.
+     */
+    private FieldSpec[] m_fieldArray = null;
 
     /**
      * The unsafe instance for schema generation.
@@ -75,6 +82,7 @@ public class Schema {
      */
     private void onFieldsUpdated() {
         m_isConstant = m_fields.stream().allMatch(FieldSpec::hasConstantSize);
+        m_fieldArray = m_fields.toArray(new FieldSpec[0]);
     }
 
     @Override
@@ -105,8 +113,8 @@ public class Schema {
      *
      * @return A set containing all field specifications within this schema.
      */
-    public Set<FieldSpec> getFields() {
-        return m_fields;
+    public FieldSpec[] getFields() {
+        return m_fieldArray;
     }
 
     /**

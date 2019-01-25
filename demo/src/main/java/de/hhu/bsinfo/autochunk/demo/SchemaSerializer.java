@@ -1,6 +1,8 @@
 package de.hhu.bsinfo.autochunk.demo;
 
 import java.lang.reflect.Array;
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +47,8 @@ public final class SchemaSerializer {
                 new ObjectSchema(Float.class, Collections.singletonList("value")),
                 new ObjectSchema(Double.class, Collections.singletonList("value")),
                 new ObjectSchema(Boolean.class, Collections.singletonList("value")),
-                new ObjectSchema(String.class, Collections.singletonList("value"))
+                new ObjectSchema(String.class, Collections.singletonList("value")),
+                new ObjectSchema(BigInteger.class, Arrays.asList("signum", "mag"))
         );
     }
 
@@ -93,10 +96,14 @@ public final class SchemaSerializer {
         int position = p_offset;
         int arraySize;
         int arrayLength;
-        int i;
+        int i, j;
         Object object;
         Object[] array;
-        for (Schema.FieldSpec fieldSpec : schema.getFields()) {
+        Schema.FieldSpec[] fields = schema.getFields();
+        Schema.FieldSpec fieldSpec = null;
+        for (i = 0; i < fields.length; i++) {
+            fieldSpec = fields[i];
+
             switch (fieldSpec.getType()) {
 
                 case BYTE:
@@ -239,8 +246,8 @@ public final class SchemaSerializer {
                     array = FieldUtil.getArray(p_object, fieldSpec);
                     UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, array.length);
                     position += Integer.BYTES;
-                    for (i = 0; i < array.length; i++) {
-                        position += serialize(array[i], p_buffer, position);
+                    for (j = 0; j < array.length; j++) {
+                        position += serialize(array[j], p_buffer, position);
                     }
                     break;
             }
@@ -280,10 +287,13 @@ public final class SchemaSerializer {
         Schema schema = getSchema(p_object.getClass());
         int position = p_offset;
         int arrayLength;
-        int i;
+        int i, j;
         Object object;
         Object[] array;
-        for (Schema.FieldSpec fieldSpec : schema.getFields()) {
+        Schema.FieldSpec[] fields = schema.getFields();
+        Schema.FieldSpec fieldSpec = null;
+        for (i = 0; i < fields.length; i++) {
+            fieldSpec = fields[i];
             switch (fieldSpec.getType()) {
 
                 case BYTE:
@@ -417,10 +427,10 @@ public final class SchemaSerializer {
                     arrayLength = UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + position);
                     position += Integer.BYTES;
                     array = FieldUtil.allocateArray(fieldSpec, arrayLength);
-                    for (i = 0; i < arrayLength; i++) {
+                    for (j = 0; j < arrayLength; j++) {
                         object = FieldUtil.allocateComponent(fieldSpec);
                         position += deserialize(object, p_buffer, position);
-                        UNSAFE.putObject(array, OBJECT_ARRAY_OFFSET + i * REFERENCE_SIZE, object);
+                        UNSAFE.putObject(array, OBJECT_ARRAY_OFFSET + j * REFERENCE_SIZE, object);
                     }
                     UNSAFE.putObject(p_object, fieldSpec.getOffset(), array);
                     break;
