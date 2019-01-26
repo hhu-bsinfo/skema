@@ -47,11 +47,6 @@ public class Schema {
     private boolean m_isConstant = false;
 
     /**
-     * Indicates if this schema describes an enum.
-     */
-    private final boolean m_isEnumSchema;
-
-    /**
      * All enum constants if this schema describes an enum.
      */
     private final ArrayList<Enum> m_enumConstants = new ArrayList<>();
@@ -63,7 +58,6 @@ public class Schema {
      */
     public Schema(final Class<?> p_class) {
         m_class = p_class;
-        m_isEnumSchema = p_class.isEnum();
     }
 
     /**
@@ -94,10 +88,6 @@ public class Schema {
 
     public Enum getEnumConstant(final int p_ordinal) {
         return m_enumConstants.get(p_ordinal);
-    }
-
-    public boolean isEnumSchema() {
-        return m_isEnumSchema;
     }
 
     /**
