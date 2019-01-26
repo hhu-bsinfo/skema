@@ -1,13 +1,11 @@
 package de.hhu.bsinfo.autochunk.demo;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.LongStream;
 
 import de.hhu.bsinfo.autochunk.demo.schema.ObjectSchema;
 import de.hhu.bsinfo.autochunk.demo.schema.Schema;
@@ -109,8 +107,7 @@ public final class SchemaSerializer {
         Schema.FieldSpec fieldSpec = null;
         for (i = 0; i < fields.length; i++) {
             fieldSpec = fields[i];
-
-            switch (fieldSpec.getType()) {
+            switch (fieldSpec.getFieldType()) {
 
                 case BYTE:
                     UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(p_object, fieldSpec.getOffset()));
@@ -280,7 +277,6 @@ public final class SchemaSerializer {
     }
 
     public static <T> T deserialize(final Class<T> p_class, final byte[] p_buffer, final int p_offset) {
-
         if (p_class.isEnum()) {
             return deserializeEnum(p_class, p_buffer, p_offset);
         }
@@ -305,7 +301,7 @@ public final class SchemaSerializer {
     }
 
     private static Object deserializeEnum(final Schema.FieldSpec fieldSpec, final byte[] p_buffer, final int p_offset) {
-        Schema schema = getSchema(fieldSpec.getField().getType());
+        Schema schema = getSchema(fieldSpec.getType());
         final int ordinal = UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + p_offset);
         return schema.getEnumConstant(ordinal);
     }
@@ -321,7 +317,7 @@ public final class SchemaSerializer {
         Schema.FieldSpec fieldSpec = null;
         for (i = 0; i < fields.length; i++) {
             fieldSpec = fields[i];
-            switch (fieldSpec.getType()) {
+            switch (fieldSpec.getFieldType()) {
 
                 case BYTE:
                     UNSAFE.putByte(p_object, fieldSpec.getOffset(), UNSAFE.getByte(p_buffer, BYTE_ARRAY_OFFSET + position));

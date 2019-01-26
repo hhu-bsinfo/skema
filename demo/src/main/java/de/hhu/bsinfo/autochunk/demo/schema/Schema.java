@@ -3,7 +3,6 @@ package de.hhu.bsinfo.autochunk.demo.schema;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -171,7 +170,7 @@ public class Schema {
         /**
          * The field's type.
          */
-        private final FieldType m_type;
+        private final FieldType m_fieldType;
 
         /**
          * The field's offset within the class.
@@ -189,19 +188,29 @@ public class Schema {
         private final Field m_field;
 
         /**
+         * The field's type.
+         */
+        private final Class<?> m_type;
+
+        /**
          * Indicates if this field is an enum.
          */
         private final boolean m_isEnum;
 
         public FieldSpec(final FieldType p_type, final long p_offset, final String p_name, final Field p_field) {
-            m_type = p_type;
+            m_fieldType = p_type;
             m_offset = p_offset;
             m_name = p_name;
             m_field = p_field;
-            m_isEnum = p_field.getType().isEnum();
+            m_type = m_field.getType();
+            m_isEnum = m_type.isEnum();
         }
 
-        public FieldType getType() {
+        public FieldType getFieldType() {
+            return m_fieldType;
+        }
+
+        public Class<?> getType() {
             return m_type;
         }
 
@@ -222,7 +231,7 @@ public class Schema {
         }
 
         public boolean hasConstantSize() {
-            return m_type.hasConstantSize();
+            return m_fieldType.hasConstantSize();
         }
 
         @Override

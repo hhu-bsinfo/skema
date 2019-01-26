@@ -1,8 +1,5 @@
 package de.hhu.bsinfo.autochunk.demo.util;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
 import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 import de.hhu.bsinfo.autochunk.demo.SchemaSerializer;
 
@@ -98,7 +95,7 @@ public final class SizeUtil {
      * @return The array's size in bytes.
      */
     public static int getArraySize(final int p_length, final Schema.FieldSpec p_fieldSpec) {
-        switch (p_fieldSpec.getType()) {
+        switch (p_fieldSpec.getFieldType()) {
             case BYTE_ARRAY:
                 return p_length * Byte.BYTES + LENGHT_FIELD_BYTES;
             case CHAR_ARRAY:
@@ -116,12 +113,12 @@ public final class SizeUtil {
             case BOOLEAN_ARRAY:
                 return p_length * Byte.BYTES + LENGHT_FIELD_BYTES;
             default:
-                throw new IllegalArgumentException(String.format("%s is not an array type", p_fieldSpec.getType()));
+                throw new IllegalArgumentException(String.format("%s is not an array type", p_fieldSpec.getFieldType()));
         }
     }
 
     public static int sizeOf(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        return SIZE_FUNCTIONS[p_fieldSpec.getType().getId()].sizeOf(p_object, p_fieldSpec);
+        return SIZE_FUNCTIONS[p_fieldSpec.getFieldType().getId()].sizeOf(p_object, p_fieldSpec);
     }
 
     public static int constantSizeOf(final Schema.FieldSpec p_fieldSpec) {

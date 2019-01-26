@@ -28,21 +28,21 @@ public final class FieldUtil {
 
     public static Object allocateInstance(final Schema.FieldSpec p_fieldSpec) {
         try {
-            return UNSAFE.allocateInstance(p_fieldSpec.getField().getType());
+            return UNSAFE.allocateInstance(p_fieldSpec.getType());
         } catch (InstantiationException e) {
-            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getField().getType().getCanonicalName()));
+            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getType().getCanonicalName()));
         }
     }
 
     public static Object[] allocateArray(final Schema.FieldSpec p_fieldSpec, final int p_length) {
-        return (Object[]) Array.newInstance(p_fieldSpec.getField().getType().getComponentType(), p_length);
+        return (Object[]) Array.newInstance(p_fieldSpec.getType().getComponentType(), p_length);
     }
 
     public static Object allocateComponent(final Schema.FieldSpec p_fieldSpec) {
         try {
-            return UNSAFE.allocateInstance(p_fieldSpec.getField().getType().getComponentType());
+            return UNSAFE.allocateInstance(p_fieldSpec.getType().getComponentType());
         } catch (InstantiationException p_e) {
-            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getField().getType().getCanonicalName()));
+            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getType().getCanonicalName()));
         }
     }
 

@@ -18,6 +18,8 @@ final class SchemaGenerator {
 
     private static final String ENUM_ORDINAL_FIELD = "ordinal";
 
+    private static final int EXCLUDED_MODIFIERS = Modifier.STATIC | Modifier.TRANSIENT;
+
     private SchemaGenerator() {}
 
     /**
@@ -34,7 +36,7 @@ final class SchemaGenerator {
         Schema schema = new Schema(p_class);
         Field[] fields = getAllFields(p_class);
         for (Field field : fields) {
-            if (!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
+            if ((field.getModifiers() & EXCLUDED_MODIFIERS) == 0) {
                 schema.addField(field);
             }
         }
