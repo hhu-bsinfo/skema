@@ -2,13 +2,9 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="de.hhu.bsinfo.autochunk.annotations.main" target="1.8" />
-      <module name="de.hhu.bsinfo.autochunk.annotations.test" target="1.8" />
       <module name="de.hhu.bsinfo.autochunk.demo.jmh" target="1.8" />
       <module name="de.hhu.bsinfo.autochunk.demo.main" target="1.8" />
       <module name="de.hhu.bsinfo.autochunk.demo.test" target="1.8" />
-      <module name="de.hhu.bsinfo.autochunk.processor.main" target="1.8" />
-      <module name="de.hhu.bsinfo.autochunk.processor.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

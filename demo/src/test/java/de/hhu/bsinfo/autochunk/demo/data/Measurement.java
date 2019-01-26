@@ -8,6 +8,10 @@ public class Measurement {
 
     private final double m_value;
 
+    public Measurement() {
+        this(0, 0);
+    }
+
     public Measurement(long p_id, double p_value) {
         m_id = p_id;
         m_value = p_value;

@@ -17,6 +17,8 @@ public final class SizeUtil {
     // length field is right in front of them (for now)
     private static final long ARRAY_LENGTH_OFFSET = 12;
 
+    private static final int LENGHT_FIELD_BYTES = Integer.BYTES;
+
     private static final int NO_SIZE = 0;
 
     private static final SizeFunction[] SIZE_FUNCTIONS = new SizeFunction[FieldType.values().length];
@@ -49,14 +51,14 @@ public final class SizeUtil {
         Schema schema = SchemaSerializer.getSchema(array[0].getClass());
 
         if (schema.isConstant()) {
-            return array.length * schema.getSize(array[0]) + Integer.BYTES;
+            return array.length * schema.getConstantSize() + LENGHT_FIELD_BYTES;
         }
 
         int size = 0;
         for (Object object : array) {
             size += schema.getSize(object);
         }
-        return size + Integer.BYTES;
+        return size + LENGHT_FIELD_BYTES;
     }
 
     /**
@@ -98,21 +100,21 @@ public final class SizeUtil {
     public static int getArraySize(final int p_length, final Schema.FieldSpec p_fieldSpec) {
         switch (p_fieldSpec.getType()) {
             case BYTE_ARRAY:
-                return p_length * Byte.BYTES + Integer.BYTES;
+                return p_length * Byte.BYTES + LENGHT_FIELD_BYTES;
             case CHAR_ARRAY:
-                return p_length * Character.BYTES + Integer.BYTES;
+                return p_length * Character.BYTES + LENGHT_FIELD_BYTES;
             case SHORT_ARRAY:
-                return p_length * Short.BYTES + Integer.BYTES;
+                return p_length * Short.BYTES + LENGHT_FIELD_BYTES;
             case INT_ARRAY:
-                return p_length * Integer.BYTES + Integer.BYTES;
+                return p_length * Integer.BYTES + LENGHT_FIELD_BYTES;
             case LONG_ARRAY:
-                return p_length * Long.BYTES + Integer.BYTES;
+                return p_length * Long.BYTES + LENGHT_FIELD_BYTES;
             case FLOAT_ARRAY:
-                return p_length * Float.BYTES + Integer.BYTES;
+                return p_length * Float.BYTES + LENGHT_FIELD_BYTES;
             case DOUBLE_ARRAY:
-                return p_length * Double.BYTES + Integer.BYTES;
+                return p_length * Double.BYTES + LENGHT_FIELD_BYTES;
             case BOOLEAN_ARRAY:
-                return p_length * Byte.BYTES + Integer.BYTES;
+                return p_length * Byte.BYTES + LENGHT_FIELD_BYTES;
             default:
                 throw new IllegalArgumentException(String.format("%s is not an array type", p_fieldSpec.getType()));
         }

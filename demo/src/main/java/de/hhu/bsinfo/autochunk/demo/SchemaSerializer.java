@@ -1,11 +1,12 @@
 package de.hhu.bsinfo.autochunk.demo;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.LongStream;
 
 import de.hhu.bsinfo.autochunk.demo.schema.ObjectSchema;
@@ -48,7 +49,12 @@ public final class SchemaSerializer {
                 new ObjectSchema(Double.class, Collections.singletonList("value")),
                 new ObjectSchema(Boolean.class, Collections.singletonList("value")),
                 new ObjectSchema(String.class, Collections.singletonList("value")),
-                new ObjectSchema(BigInteger.class, Arrays.asList("signum", "mag"))
+                new ObjectSchema(BigInteger.class, Arrays.asList("signum", "mag")),
+                new ObjectSchema(BigDecimal.class, Arrays.asList("intVal", "scale")),
+                new ObjectSchema(LocalDate.class, Arrays.asList("day", "month", "year")),
+                new ObjectSchema(LocalTime.class, Arrays.asList("hour", "minute", "second", "nano")),
+                new ObjectSchema(LocalDateTime.class, Arrays.asList("date", "time")),
+                new ObjectSchema(UUID.class, Arrays.asList("mostSigBits", "leastSigBits"))
         );
     }
 
@@ -274,6 +280,11 @@ public final class SchemaSerializer {
     }
 
     public static <T> T deserialize(final Class<T> p_class, final byte[] p_buffer, final int p_offset) {
+
+        if (p_class.isEnum()) {
+            return deserializeEnum(p_class, p_buffer, p_offset);
+        }
+
         try {
             Object object = UNSAFE.allocateInstance(p_class);
             deserialize(object, p_buffer, p_offset);
@@ -281,6 +292,22 @@ public final class SchemaSerializer {
         } catch (InstantiationException e) {
             return null;
         }
+    }
+
+    private static <T> T deserializeEnum(final Class<T> p_class, final byte[] p_buffer) {
+        return deserializeEnum(p_class, p_buffer, 0);
+    }
+
+    private static <T> T deserializeEnum(final Class<T> p_class, final byte[] p_buffer, final int p_offset) {
+        Schema schema = getSchema(p_class);
+        final int ordinal = UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + p_offset);
+        return p_class.cast(schema.getEnumConstant(ordinal));
+    }
+
+    private static Object deserializeEnum(final Schema.FieldSpec fieldSpec, final byte[] p_buffer, final int p_offset) {
+        Schema schema = getSchema(fieldSpec.getField().getType());
+        final int ordinal = UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + p_offset);
+        return schema.getEnumConstant(ordinal);
     }
 
     public static int deserialize(final Object p_object, final byte[] p_buffer, final int p_offset) {
@@ -418,8 +445,13 @@ public final class SchemaSerializer {
                 //  In this case we create an instance of the class and deserialize our data into it.
 
                 case OBJECT:
-                    object = FieldUtil.allocateInstance(fieldSpec);
-                    position += deserialize(object, p_buffer, position);
+                    if (fieldSpec.isEnum()) {
+                        object = deserializeEnum(fieldSpec, p_buffer, p_offset);
+                        position += Integer.BYTES;
+                    } else {
+                        object = FieldUtil.allocateInstance(fieldSpec);
+                        position += deserialize(object, p_buffer, position);
+                    }
                     UNSAFE.putObject(p_object, fieldSpec.getOffset(), object);
                     break;
 

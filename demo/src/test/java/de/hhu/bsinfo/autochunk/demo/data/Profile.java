@@ -16,6 +16,10 @@ public class Profile {
 
     private final Storyboard m_storyboard;
 
+    public Profile() {
+        this(0, null, null, null, null);
+    }
+
     public Profile(long p_id, String p_firstname, String p_lastname, long[] p_friends,
             Storyboard p_storyboard) {
         m_id = p_id;

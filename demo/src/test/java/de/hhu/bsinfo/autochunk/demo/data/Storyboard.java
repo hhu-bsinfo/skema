@@ -8,6 +8,10 @@ public class Storyboard {
 
     private final int m_postCount;
 
+    public Storyboard() {
+        this(0, 0);
+    }
+
     public Storyboard(long p_id, int p_postCount) {
         m_id = p_id;
         m_postCount = p_postCount;

@@ -47,12 +47,23 @@ public class Schema {
     private boolean m_isConstant = false;
 
     /**
+     * Indicates if this schema describes an enum.
+     */
+    private final boolean m_isEnumSchema;
+
+    /**
+     * All enum constants if this schema describes an enum.
+     */
+    private final ArrayList<Enum> m_enumConstants = new ArrayList<>();
+
+    /**
      * Creates a new Schema instance for the provided class.
      *
      * @param p_class The class described by this schema instance.
      */
     public Schema(final Class<?> p_class) {
         m_class = p_class;
+        m_isEnumSchema = p_class.isEnum();
     }
 
     /**
@@ -75,6 +86,18 @@ public class Schema {
         m_fields.add(fieldSpec);
 
         onFieldsUpdated();
+    }
+
+    public void addEnumConstant(final Enum p_enum) {
+        m_enumConstants.add(p_enum.ordinal(), p_enum);
+    }
+
+    public Enum getEnumConstant(final int p_ordinal) {
+        return m_enumConstants.get(p_ordinal);
+    }
+
+    public boolean isEnumSchema() {
+        return m_isEnumSchema;
     }
 
     /**
@@ -142,6 +165,10 @@ public class Schema {
         return m_isConstant;
     }
 
+    public int getConstantSize() {
+        return m_constantSize;
+    }
+
     public Class<?> getTarget() {
         return m_class;
     }
@@ -167,15 +194,21 @@ public class Schema {
         private final String m_name;
 
         /**
-         * the field.
+         * The field.
          */
         private final Field m_field;
+
+        /**
+         * Indicates if this field is an enum.
+         */
+        private final boolean m_isEnum;
 
         public FieldSpec(final FieldType p_type, final long p_offset, final String p_name, final Field p_field) {
             m_type = p_type;
             m_offset = p_offset;
             m_name = p_name;
             m_field = p_field;
+            m_isEnum = p_field.getType().isEnum();
         }
 
         public FieldType getType() {
@@ -192,6 +225,10 @@ public class Schema {
 
         public Field getField() {
             return m_field;
+        }
+
+        public boolean isEnum() {
+            return m_isEnum;
         }
 
         public boolean hasConstantSize() {
