@@ -21,7 +21,8 @@ public enum FieldType {
     FLOAT_ARRAY(14, float[].class.getCanonicalName(), false),
     DOUBLE_ARRAY(15, double[].class.getCanonicalName(), false),
     BOOLEAN_ARRAY(16, boolean[].class.getCanonicalName(), false),
-    OBJECT_ARRAY(17, Object[].class.getCanonicalName(), false);
+    OBJECT_ARRAY(17, Object[].class.getCanonicalName(), false),
+    ENUM(18, Enum.class.getCanonicalName(), true);
 
     /**
      * The field type's unique identifier.
@@ -57,6 +58,10 @@ public enum FieldType {
     }
 
     public static FieldType fromClass(Class<?> p_class) {
+        if (p_class.isEnum()) {
+            return ENUM;
+        }
+
         for (FieldType fieldType : FieldType.values()) {
             if (fieldType.m_name.equals(p_class.getCanonicalName())) {
                 return fieldType;

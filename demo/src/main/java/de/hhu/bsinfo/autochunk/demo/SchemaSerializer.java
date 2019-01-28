@@ -10,7 +10,7 @@ import java.util.*;
 import de.hhu.bsinfo.autochunk.demo.schema.ObjectSchema;
 import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 import de.hhu.bsinfo.autochunk.demo.util.FieldUtil;
-import de.hhu.bsinfo.autochunk.demo.util.PartialObject;
+import de.hhu.bsinfo.autochunk.demo.util.Operation;
 import de.hhu.bsinfo.autochunk.demo.util.SizeUtil;
 import de.hhu.bsinfo.autochunk.demo.util.UnsafeProvider;
 
@@ -240,6 +240,7 @@ public final class SchemaSerializer {
                 //  In this case we retrieve the instance from our object and serialize it.
                 //  (This will fail if the reference is null).
 
+                case ENUM:
                 case OBJECT:
                     object = FieldUtil.getObject(p_object, fieldSpec);
                     position += serialize(object, p_buffer, position);
@@ -259,12 +260,12 @@ public final class SchemaSerializer {
         return position - p_offset;
     }
 
-    public static void deserialize(final PartialObject p_object, final byte[] p_buffer, final int p_offset) {
+    public static void deserialize(final Operation p_object, final byte[] p_buffer, final int p_offset) {
         if (p_object.isFinished()) {
             return;
         }
 
-        int bytesProcessed = deserialize(p_object.get(), p_buffer, p_offset);
+        int bytesProcessed = deserialize(p_object.getObject(), p_buffer, p_offset);
         p_object.addCurrentBytes(bytesProcessed);
     }
 
@@ -300,8 +301,8 @@ public final class SchemaSerializer {
         return p_class.cast(schema.getEnumConstant(ordinal));
     }
 
-    private static Object deserializeEnum(final Schema.FieldSpec fieldSpec, final byte[] p_buffer, final int p_offset) {
-        Schema schema = getSchema(fieldSpec.getType());
+    private static Object deserializeEnum(final Schema.FieldSpec p_fieldSpec, final byte[] p_buffer, final int p_offset) {
+        Schema schema = getSchema(p_fieldSpec.getType());
         final int ordinal = UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + p_offset);
         return schema.getEnumConstant(ordinal);
     }
@@ -440,14 +441,15 @@ public final class SchemaSerializer {
                 //  Primitive types are handled above. All other types must be objects.
                 //  In this case we create an instance of the class and deserialize our data into it.
 
+                case ENUM:
+                    object = deserializeEnum(fieldSpec, p_buffer, p_offset);
+                    position += Integer.BYTES;
+                    UNSAFE.putObject(p_object, fieldSpec.getOffset(), object);
+                    break;
+
                 case OBJECT:
-                    if (fieldSpec.isEnum()) {
-                        object = deserializeEnum(fieldSpec, p_buffer, p_offset);
-                        position += Integer.BYTES;
-                    } else {
-                        object = FieldUtil.allocateInstance(fieldSpec);
-                        position += deserialize(object, p_buffer, position);
-                    }
+                    object = FieldUtil.allocateInstance(fieldSpec);
+                    position += deserialize(object, p_buffer, position);
                     UNSAFE.putObject(p_object, fieldSpec.getOffset(), object);
                     break;
 
@@ -467,5 +469,68 @@ public final class SchemaSerializer {
 
         return position - p_offset;
     }
+
+
+
+
+    // -------------------------- WORK IN PROGRESS ---------------------------- //
+
+    @Deprecated
+    public static int serialize(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
+        if (p_length == 0) {
+            return 0;
+        }
+
+        Object target = p_operation.getObject();
+        Schema schema = getSchema(target.getClass());
+        int position = p_offset;
+        int bytesLeft = p_length;
+
+        int i = p_operation.hasStarted() ? p_operation.popIndex() : 0;
+        Schema.FieldSpec fieldSpec;
+        Schema.FieldSpec[] fields = schema.getFields();
+        for (; i < fields.length; i++) {
+            fieldSpec = fields[i];
+            switch (fieldSpec.getFieldType()) {
+
+                case SHORT:
+
+                    if (bytesLeft < Short.BYTES) {
+                        p_operation.pushIndex(i);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putShort(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getShort(target, fieldSpec.getOffset()));
+                    position += Short.BYTES;
+                    bytesLeft -= Short.BYTES;
+                    break;
+
+                case INT:
+
+                    if (bytesLeft < Short.BYTES) {
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(target, fieldSpec.getOffset()));
+                    position += Integer.BYTES;
+                    bytesLeft -= Short.BYTES;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return position - p_offset;
+    }
+
+
+
+
+
+
+
+
+
 
 }

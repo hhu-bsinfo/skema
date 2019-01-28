@@ -39,6 +39,7 @@ public final class SizeUtil {
         SIZE_FUNCTIONS[FieldType.DOUBLE_ARRAY.getId()] = SizeUtil::getArraySize;
         SIZE_FUNCTIONS[FieldType.BOOLEAN_ARRAY.getId()] = SizeUtil::getArraySize;
         SIZE_FUNCTIONS[FieldType.OBJECT_ARRAY.getId()] = SizeUtil::getObjectArraySize;
+        SIZE_FUNCTIONS[FieldType.ENUM.getId()] = ((p_object, p_fieldSpec) -> Integer.BYTES);
     }
 
     private SizeUtil() {}

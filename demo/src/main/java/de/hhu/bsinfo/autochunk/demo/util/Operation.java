@@ -1,6 +1,6 @@
 package de.hhu.bsinfo.autochunk.demo.util;
 
-public class PartialObject {
+public class Operation {
 
     private Object m_object;
 
@@ -8,18 +8,26 @@ public class PartialObject {
 
     private int m_currentBytes;
 
-    public PartialObject(Object p_object, int p_expectedBytes) {
+    private final int[] m_indexStack = new int[128];
+
+    private int m_stackPosition = 0;
+
+    public Operation(Object p_object, int p_expectedBytes) {
         this(p_object, p_expectedBytes, 0);
     }
 
-    public PartialObject(Object p_object, int p_expectedBytes, int p_currentBytes) {
+    public Operation(Object p_object, int p_expectedBytes, int p_currentBytes) {
         m_object = p_object;
         m_expectedBytes = p_expectedBytes;
         m_currentBytes = p_currentBytes;
     }
 
-    public Object get() {
+    public Object getObject() {
         return m_object;
+    }
+
+    public byte[] getBuffer() {
+        return (byte[]) m_object;
     }
 
     public int getExpectedBytes() {
@@ -30,7 +38,7 @@ public class PartialObject {
         return m_currentBytes;
     }
 
-    public void set(Object p_target) {
+    public void setTarget(Object p_target) {
         m_object = p_target;
     }
 
@@ -44,6 +52,18 @@ public class PartialObject {
 
     public void addCurrentBytes(int p_bytesProcessed) {
         m_currentBytes += p_bytesProcessed;
+    }
+
+    public void pushIndex(final int p_index) {
+        m_indexStack[m_stackPosition++] = p_index;
+    }
+
+    public int popIndex() {
+        return m_indexStack[m_stackPosition--];
+    }
+
+    public boolean hasStarted() {
+        return m_currentBytes != 0;
     }
 
     public void reset() {
