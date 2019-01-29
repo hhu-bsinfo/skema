@@ -486,34 +486,39 @@ public final class SchemaSerializer {
         int position = p_offset;
         int bytesLeft = p_length;
 
-        int i = p_operation.hasStarted() ? p_operation.popIndex() : 0;
+        int i = p_operation.hasStarted() ? p_operation.popSourceIndex() : 0;
         Schema.FieldSpec fieldSpec;
         Schema.FieldSpec[] fields = schema.getFields();
         for (; i < fields.length; i++) {
             fieldSpec = fields[i];
             switch (fieldSpec.getFieldType()) {
 
-                case SHORT:
-
-                    if (bytesLeft < Short.BYTES) {
-                        p_operation.pushIndex(i);
+                case LONG:
+                    if (bytesLeft < Long.BYTES) {
+                        p_operation.pushSourceIndex(i);
                         i = fields.length;
+                        UNSAFE.copyMemory(p_buffer, BYTE_ARRAY_OFFSET + position, target, fieldSpec.getOffset(), bytesLeft);
+                        position += bytesLeft;
                         break;
                     }
-                    UNSAFE.putShort(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getShort(target, fieldSpec.getOffset()));
-                    position += Short.BYTES;
-                    bytesLeft -= Short.BYTES;
+                    UNSAFE.putLong(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getLong(target, fieldSpec.getOffset()));
+                    position += Long.BYTES;
+                    bytesLeft -= Long.BYTES;
                     break;
 
-                case INT:
-
-                    if (bytesLeft < Short.BYTES) {
+                case DOUBLE:
+                    if (bytesLeft < Double.BYTES) {
+                        p_operation.pushSourceIndex(i);
+                        for (i = p_operation.getOffset(); i < p_operation.getOffset() + bytesLeft; i++, position++) {
+                            UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(target, fieldSpec.getOffset() + i));
+                        }
+                        p_operation.setOffset(bytesLeft);
                         i = fields.length;
                         break;
                     }
-                    UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(target, fieldSpec.getOffset()));
-                    position += Integer.BYTES;
-                    bytesLeft -= Short.BYTES;
+                    UNSAFE.putDouble(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getDouble(target, fieldSpec.getOffset()));
+                    position += Double.BYTES;
+                    bytesLeft -= Double.BYTES;
                     break;
 
                 default:
@@ -521,6 +526,7 @@ public final class SchemaSerializer {
             }
         }
 
+        p_operation.addCurrentBytes(position - p_offset);
         return position - p_offset;
     }
 

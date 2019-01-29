@@ -8,9 +8,15 @@ public class Operation {
 
     private int m_currentBytes;
 
-    private final int[] m_indexStack = new int[128];
+    private final int[] m_sourceIndexStack = new int[128];
 
-    private int m_stackPosition = 0;
+    private final int[] m_targetIndexStack = new int[128];
+
+    private int m_sourceStackPosition = 0;
+
+    private int m_targetStackPosition = 0;
+
+    private int m_offset = 0;
 
     public Operation(Object p_object, int p_expectedBytes) {
         this(p_object, p_expectedBytes, 0);
@@ -54,12 +60,20 @@ public class Operation {
         m_currentBytes += p_bytesProcessed;
     }
 
-    public void pushIndex(final int p_index) {
-        m_indexStack[m_stackPosition++] = p_index;
+    public void pushSourceIndex(final int p_index) {
+        m_sourceIndexStack[m_sourceStackPosition++] = p_index;
     }
 
-    public int popIndex() {
-        return m_indexStack[m_stackPosition--];
+    public int popSourceIndex() {
+        return m_sourceIndexStack[--m_sourceStackPosition];
+    }
+
+    public void pushTargetIndex(final int p_index) {
+        m_targetIndexStack[m_targetStackPosition++] = p_index;
+    }
+
+    public int popTargetIndex() {
+        return m_targetIndexStack[--m_targetStackPosition];
     }
 
     public boolean hasStarted() {
@@ -69,6 +83,14 @@ public class Operation {
     public void reset() {
         reset(null, 0);
 
+    }
+
+    public int getOffset() {
+        return m_offset;
+    }
+
+    public void setOffset(int p_offset) {
+        m_offset = p_offset;
     }
 
     public void reset(final Object p_target, final int p_expectedBytes) {
