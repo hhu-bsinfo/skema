@@ -476,47 +476,42 @@ public final class SchemaSerializer {
     // -------------------------- WORK IN PROGRESS ---------------------------- //
 
     @Deprecated
-    public static int serialize(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
+    private static int serializeNormal(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
         if (p_length == 0) {
             return 0;
         }
 
-        Object target = p_operation.getObject();
-        Schema schema = getSchema(target.getClass());
+        Object object = p_operation.getObject();
+        Schema schema = getSchema(object.getClass());
         int position = p_offset;
         int bytesLeft = p_length;
 
-        int i = p_operation.hasStarted() ? p_operation.popSourceIndex() : 0;
         Schema.FieldSpec fieldSpec;
         Schema.FieldSpec[] fields = schema.getFields();
+
+        int i = p_operation.popIndex();
         for (; i < fields.length; i++) {
             fieldSpec = fields[i];
             switch (fieldSpec.getFieldType()) {
 
                 case LONG:
                     if (bytesLeft < Long.BYTES) {
-                        p_operation.pushSourceIndex(i);
+                        p_operation.pushIndex(i);
                         i = fields.length;
-                        UNSAFE.copyMemory(p_buffer, BYTE_ARRAY_OFFSET + position, target, fieldSpec.getOffset(), bytesLeft);
-                        position += bytesLeft;
                         break;
                     }
-                    UNSAFE.putLong(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getLong(target, fieldSpec.getOffset()));
+                    UNSAFE.putLong(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getLong(object, fieldSpec.getOffset()));
                     position += Long.BYTES;
                     bytesLeft -= Long.BYTES;
                     break;
 
                 case DOUBLE:
                     if (bytesLeft < Double.BYTES) {
-                        p_operation.pushSourceIndex(i);
-                        for (i = p_operation.getOffset(); i < p_operation.getOffset() + bytesLeft; i++, position++) {
-                            UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(target, fieldSpec.getOffset() + i));
-                        }
-                        p_operation.setOffset(bytesLeft);
+                        p_operation.pushIndex(i);
                         i = fields.length;
                         break;
                     }
-                    UNSAFE.putDouble(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getDouble(target, fieldSpec.getOffset()));
+                    UNSAFE.putDouble(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getDouble(object, fieldSpec.getOffset()));
                     position += Double.BYTES;
                     bytesLeft -= Double.BYTES;
                     break;
@@ -526,17 +521,72 @@ public final class SchemaSerializer {
             }
         }
 
-        p_operation.addCurrentBytes(position - p_offset);
         return position - p_offset;
     }
 
+    private static int serializeInterrupted(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
+        if (p_length == 0) {
+            return 0;
+        }
 
+        Object target = p_operation.getTarget();
+        Schema.FieldSpec fieldSpec = p_operation.getFieldSpec();
+        int fieldProcessed = p_operation.getFieldProcessed();
+        int fieldLeft = p_operation.getFieldLeft();
+        int position = p_offset;
+        int byteCap;
 
+        // Remove interruption status if enough bytes can be read
+        if (p_length >= fieldLeft) {
+            byteCap = fieldProcessed + fieldLeft;
+            p_operation.setStatus(Operation.Status.NONE);
+        } else {
+            byteCap = fieldProcessed + p_length;
+        }
 
+        switch (fieldSpec.getFieldType()) {
 
+            case LONG:
+                for (; fieldProcessed < byteCap; fieldProcessed++, position++) {
+                    UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(target, fieldSpec.getOffset() + fieldProcessed));
+                }
+                break;
 
+            case DOUBLE:
+                for (; fieldProcessed < byteCap; fieldProcessed++, position++) {
+                    UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(target, fieldSpec.getOffset() + fieldProcessed));
+                }
+                break;
 
+            default:
+                break;
+        }
 
+        return position - p_offset;
+    }
 
+    @Deprecated
+    public static int serialize(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
+        if (p_length == 0) {
+            return 0;
+        }
 
+        // Try to serialize an interrupted field first
+        int totalBytes = 0;
+        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += serializeInterrupted(p_operation, p_buffer, p_offset, p_length);
+        }
+
+        // Perform normal serialization if the interruption status has been cleared
+        if (p_operation.getStatus() == Operation.Status.NONE) {
+            totalBytes += serializeNormal(p_operation, p_buffer, p_offset, p_length - totalBytes);
+        }
+
+        // Write interrupted field if normal serialization did not work
+        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += serializeInterrupted(p_operation, p_buffer, p_offset, p_length - totalBytes);
+        }
+
+        return totalBytes;
+    }
 }

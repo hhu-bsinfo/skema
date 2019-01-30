@@ -8,13 +8,16 @@ public class Measurement {
 
     private final double m_value;
 
+    private final long m_timestamp;
+
     public Measurement() {
-        this(0, 0);
+        this(0, 0, 0);
     }
 
-    public Measurement(long p_id, double p_value) {
+    public Measurement(long p_id, double p_value, long p_timestamp) {
         m_id = p_id;
         m_value = p_value;
+        m_timestamp = p_timestamp;
     }
 
     public long getId() {
@@ -44,7 +47,7 @@ public class Measurement {
     }
 
     public static Measurement random() {
-        return new Measurement(RandomUtil.randomLong(), RandomUtil.randomDouble());
+        return new Measurement(RandomUtil.randomLong(), RandomUtil.randomDouble(), RandomUtil.randomLong());
     }
 
     @Override

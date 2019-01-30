@@ -1,105 +1,132 @@
 package de.hhu.bsinfo.autochunk.demo.util;
 
+import de.hhu.bsinfo.autochunk.demo.schema.Schema;
+
 public class Operation {
 
-    private Object m_object;
-
-    private int m_expectedBytes;
-
-    private int m_currentBytes;
-
-    private final int[] m_sourceIndexStack = new int[128];
-
-    private final int[] m_targetIndexStack = new int[128];
-
-    private int m_sourceStackPosition = 0;
-
-    private int m_targetStackPosition = 0;
-
-    private int m_offset = 0;
-
-    public Operation(Object p_object, int p_expectedBytes) {
-        this(p_object, p_expectedBytes, 0);
+    public enum Status {
+        NONE, INTERRUPTED
     }
 
-    public Operation(Object p_object, int p_expectedBytes, int p_currentBytes) {
-        m_object = p_object;
-        m_expectedBytes = p_expectedBytes;
-        m_currentBytes = p_currentBytes;
+    private Object m_result;
+
+    private Object m_target;
+
+    private Schema m_schema;
+
+    private Schema.FieldSpec m_fieldSpec;
+
+    private int m_bytesProcessed;
+
+    private int m_fieldProcessed = 0;
+
+    private int m_fieldLeft = 0;
+
+    private Status m_status = Status.NONE;
+
+    private final int[] m_indexStack = new int[128];
+
+    private int m_stackPosition = 0;
+
+    public Operation(Object p_result) {
+        m_result = p_result;
     }
 
     public Object getObject() {
-        return m_object;
+        return m_result;
     }
 
     public byte[] getBuffer() {
-        return (byte[]) m_object;
+        return (byte[]) m_result;
     }
 
-    public int getExpectedBytes() {
-        return m_expectedBytes;
+
+    public int getBytesProcessed() {
+        return m_bytesProcessed;
     }
 
-    public int getCurrentBytes() {
-        return m_currentBytes;
+    public void setResult(Object p_result) {
+        m_result = p_result;
+    }
+
+    public Object getTarget() {
+        return m_target;
     }
 
     public void setTarget(Object p_target) {
-        m_object = p_target;
+        m_target = p_target;
     }
 
-    public void setExpectedBytes(int p_expectedBytes) {
-        m_expectedBytes = p_expectedBytes;
-    }
-
-    public void setCurrentBytes(int p_currentBytes) {
-        m_currentBytes = p_currentBytes;
+    public void setBytesProcessed(int p_bytesProcessed) {
+        m_bytesProcessed = p_bytesProcessed;
     }
 
     public void addCurrentBytes(int p_bytesProcessed) {
-        m_currentBytes += p_bytesProcessed;
+        m_bytesProcessed += p_bytesProcessed;
     }
 
-    public void pushSourceIndex(final int p_index) {
-        m_sourceIndexStack[m_sourceStackPosition++] = p_index;
+    public Status getStatus() {
+        return m_status;
     }
 
-    public int popSourceIndex() {
-        return m_sourceIndexStack[--m_sourceStackPosition];
+    public void setStatus(final Status p_status) {
+        m_status = p_status;
     }
 
-    public void pushTargetIndex(final int p_index) {
-        m_targetIndexStack[m_targetStackPosition++] = p_index;
+    public void pushIndex(final int p_index) {
+        m_indexStack[m_stackPosition++] = p_index;
     }
 
-    public int popTargetIndex() {
-        return m_targetIndexStack[--m_targetStackPosition];
+    public int popIndex() {
+        return m_stackPosition != 0 ? m_indexStack[--m_stackPosition] : 0;
     }
 
     public boolean hasStarted() {
-        return m_currentBytes != 0;
+        return m_bytesProcessed != 0;
     }
 
     public void reset() {
         reset(null, 0);
-
     }
 
-    public int getOffset() {
-        return m_offset;
+    public int getFieldProcessed() {
+        return m_fieldProcessed;
     }
 
-    public void setOffset(int p_offset) {
-        m_offset = p_offset;
+    public void setFieldProcessed(int p_fieldProcessed) {
+        m_fieldProcessed = p_fieldProcessed;
     }
 
     public void reset(final Object p_target, final int p_expectedBytes) {
-        m_object = p_target;
-        m_expectedBytes = p_expectedBytes;
-        m_currentBytes = 0;
+        m_result = p_target;
+        m_bytesProcessed = 0;
     }
 
-    public boolean isFinished() {
-        return m_object != null && m_expectedBytes == m_currentBytes;
+    public int getFieldLeft() {
+        return m_fieldLeft;
+    }
+
+    public void setFieldLeft(int p_fieldLeft) {
+        m_fieldLeft = p_fieldLeft;
+    }
+
+    public Object getResult() {
+        return m_result;
+    }
+
+    public Schema getSchema() {
+        return m_schema;
+    }
+
+    public void setSchema(Schema p_schema) {
+        m_schema = p_schema;
+    }
+
+    public Schema.FieldSpec getFieldSpec() {
+        return m_fieldSpec;
+    }
+
+    public void setFieldSpec(Schema.FieldSpec p_fieldSpec) {
+        m_fieldSpec = p_fieldSpec;
     }
 }
