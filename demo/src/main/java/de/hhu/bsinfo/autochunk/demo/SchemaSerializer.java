@@ -260,15 +260,6 @@ public final class SchemaSerializer {
         return position - p_offset;
     }
 
-    public static void deserialize(final Operation p_object, final byte[] p_buffer, final int p_offset) {
-        if (p_object.isFinished()) {
-            return;
-        }
-
-        int bytesProcessed = deserialize(p_object.getObject(), p_buffer, p_offset);
-        p_object.addCurrentBytes(bytesProcessed);
-    }
-
     public static void deserialize(final Object p_object, final byte[] p_buffer) {
         deserialize(p_object, p_buffer, 0);
     }
@@ -494,9 +485,53 @@ public final class SchemaSerializer {
             fieldSpec = fields[i];
             switch (fieldSpec.getFieldType()) {
 
+                case BYTE:
+                    if (bytesLeft < Byte.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Byte.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(object, fieldSpec.getOffset()));
+                    position += Byte.BYTES;
+                    bytesLeft -= Byte.BYTES;
+                    break;
+
+                case CHAR:
+                    if (bytesLeft < Character.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Character.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putChar(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getChar(object, fieldSpec.getOffset()));
+                    position += Character.BYTES;
+                    bytesLeft -= Character.BYTES;
+                    break;
+
+                case SHORT:
+                    if (bytesLeft < Short.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Short.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putShort(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getShort(object, fieldSpec.getOffset()));
+                    position += Short.BYTES;
+                    bytesLeft -= Short.BYTES;
+                    break;
+
+                case INT:
+                    if (bytesLeft < Integer.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Integer.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(object, fieldSpec.getOffset()));
+                    position += Integer.BYTES;
+                    bytesLeft -= Integer.BYTES;
+                    break;
+
                 case LONG:
                     if (bytesLeft < Long.BYTES) {
-                        p_operation.pushIndex(i);
+                        saveState(p_operation, fieldSpec, object, i, Long.BYTES);
                         i = fields.length;
                         break;
                     }
@@ -505,9 +540,20 @@ public final class SchemaSerializer {
                     bytesLeft -= Long.BYTES;
                     break;
 
+                case FLOAT:
+                    if (bytesLeft < Float.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Float.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putFloat(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getFloat(object, fieldSpec.getOffset()));
+                    position += Float.BYTES;
+                    bytesLeft -= Float.BYTES;
+                    break;
+
                 case DOUBLE:
                     if (bytesLeft < Double.BYTES) {
-                        p_operation.pushIndex(i);
+                        saveState(p_operation, fieldSpec, object, i, Double.BYTES);
                         i = fields.length;
                         break;
                     }
@@ -524,6 +570,15 @@ public final class SchemaSerializer {
         return position - p_offset;
     }
 
+    private static void saveState(final Operation p_operation, final Schema.FieldSpec p_fieldSpec, final Object p_target, final int p_index, final int p_size) {
+        p_operation.pushIndex(p_index + 1);
+        p_operation.setFieldSpec(p_fieldSpec);
+        p_operation.setTarget(p_target);
+        p_operation.setFieldLeft(p_size);
+        p_operation.setFieldProcessed(0);
+        p_operation.setStatus(Operation.Status.INTERRUPTED);
+    }
+
     private static int serializeInterrupted(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
         if (p_length == 0) {
             return 0;
@@ -536,30 +591,36 @@ public final class SchemaSerializer {
         int position = p_offset;
         int byteCap;
 
-        // Remove interruption status if enough bytes can be read
+
         if (p_length >= fieldLeft) {
             byteCap = fieldProcessed + fieldLeft;
-            p_operation.setStatus(Operation.Status.NONE);
         } else {
             byteCap = fieldProcessed + p_length;
         }
 
         switch (fieldSpec.getFieldType()) {
 
+            case BYTE:
+            case CHAR:
+            case SHORT:
+            case INT:
             case LONG:
-                for (; fieldProcessed < byteCap; fieldProcessed++, position++) {
-                    UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(target, fieldSpec.getOffset() + fieldProcessed));
-                }
-                break;
-
+            case FLOAT:
             case DOUBLE:
-                for (; fieldProcessed < byteCap; fieldProcessed++, position++) {
+                for (; fieldProcessed < byteCap; fieldProcessed++, position++, fieldLeft--) {
                     UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(target, fieldSpec.getOffset() + fieldProcessed));
                 }
                 break;
 
             default:
                 break;
+        }
+
+        p_operation.setFieldProcessed(fieldProcessed);
+        p_operation.setFieldLeft(fieldLeft);
+
+        if (fieldLeft == 0) {
+            p_operation.setStatus(Operation.Status.NONE);
         }
 
         return position - p_offset;
@@ -579,12 +640,12 @@ public final class SchemaSerializer {
 
         // Perform normal serialization if the interruption status has been cleared
         if (p_operation.getStatus() == Operation.Status.NONE) {
-            totalBytes += serializeNormal(p_operation, p_buffer, p_offset, p_length - totalBytes);
+            totalBytes += serializeNormal(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
         }
 
         // Write interrupted field if normal serialization did not work
         if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
-            totalBytes += serializeInterrupted(p_operation, p_buffer, p_offset, p_length - totalBytes);
+            totalBytes += serializeInterrupted(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
         }
 
         return totalBytes;
