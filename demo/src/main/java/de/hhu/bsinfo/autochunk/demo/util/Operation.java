@@ -1,8 +1,28 @@
 package de.hhu.bsinfo.autochunk.demo.util;
 
+import java.lang.reflect.Field;
+
 import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 
 public class Operation {
+
+    public static final Schema.FieldSpec ARRAY_SIZE_FIELD;
+
+    static {
+        try {
+            sun.misc.Unsafe unsafe = UnsafeProvider.getUnsafe();
+            Field field = Operation.class.getDeclaredField("m_arraySize");
+            long offset = unsafe.objectFieldOffset(field);
+            ARRAY_SIZE_FIELD = new Schema.FieldSpec(
+                    FieldType.INT,
+                    offset,
+                    "m_arraySize",
+                    field
+            );
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Could not find array size field", e);
+        }
+    }
 
     public enum Status {
         NONE, INTERRUPTED
@@ -27,6 +47,18 @@ public class Operation {
     private final int[] m_indexStack = new int[128];
 
     private int m_stackPosition = 0;
+
+    private int m_arraySize = 0;
+
+    private boolean m_isArraySizeInitialized = false;
+
+    public boolean isArraySizeInitialized() {
+        return m_isArraySizeInitialized;
+    }
+
+    public void setArraySizeInitialized(boolean p_arraySizeInitialized) {
+        m_isArraySizeInitialized = p_arraySizeInitialized;
+    }
 
     public Operation(Object p_result) {
         m_result = p_result;
@@ -108,6 +140,14 @@ public class Operation {
 
     public void setFieldLeft(int p_fieldLeft) {
         m_fieldLeft = p_fieldLeft;
+    }
+
+    public int getArraySize() {
+        return m_arraySize;
+    }
+
+    public void setArraySize(int p_arraySize) {
+        m_arraySize = p_arraySize;
     }
 
     public Object getResult() {

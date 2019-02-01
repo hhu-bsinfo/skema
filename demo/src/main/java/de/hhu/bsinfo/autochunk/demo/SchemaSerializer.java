@@ -472,10 +472,13 @@ public final class SchemaSerializer {
             return 0;
         }
 
+        Object tmpObject;
         Object object = p_operation.getObject();
         Schema schema = getSchema(object.getClass());
         int position = p_offset;
         int bytesLeft = p_length;
+        int arrayLength;
+        int arraySize;
 
         Schema.FieldSpec fieldSpec;
         Schema.FieldSpec[] fields = schema.getFields();
@@ -486,12 +489,13 @@ public final class SchemaSerializer {
             switch (fieldSpec.getFieldType()) {
 
                 case BYTE:
-                    if (bytesLeft < Byte.BYTES) {
-                        saveState(p_operation, fieldSpec, object, i, Byte.BYTES);
-                        i = fields.length;
-                        break;
-                    }
                     UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(object, fieldSpec.getOffset()));
+                    position += Byte.BYTES;
+                    bytesLeft -= Byte.BYTES;
+                    break;
+
+                case BOOLEAN:
+                    UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getBoolean(object, fieldSpec.getOffset()) ? TRUE : FALSE);
                     position += Byte.BYTES;
                     bytesLeft -= Byte.BYTES;
                     break;
@@ -562,12 +566,133 @@ public final class SchemaSerializer {
                     bytesLeft -= Double.BYTES;
                     break;
 
+                case BYTE_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Byte.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, BYTE_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+                case CHAR_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Character.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, CHAR_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+                case SHORT_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Short.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, SHORT_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+                case INT_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Integer.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, INT_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+                case LONG_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Long.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, LONG_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+                case FLOAT_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Float.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, FLOAT_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+                case DOUBLE_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Double.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, DOUBLE_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+                case BOOLEAN_ARRAY:
+                    tmpObject = FieldUtil.getObject(object, fieldSpec);
+                    arrayLength = SizeUtil.getArrayLength(tmpObject);
+                    arraySize = arrayLength * Byte.BYTES + Integer.BYTES;
+                    if (bytesLeft < arraySize) {
+                        saveState(p_operation, fieldSpec, tmpObject, i, arraySize);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(tmpObject, BOOLEAN_ARRAY_OFFSET - Integer.BYTES, p_buffer, BYTE_ARRAY_OFFSET + position, arraySize);
+                    position += arraySize;
+                    bytesLeft -= arraySize;
+                    break;
+
+
                 default:
                     break;
             }
         }
 
         return position - p_offset;
+    }
+
+    private static void saveArrayState(final Operation p_operation, final Object p_target, final int p_index, final int p_size) {
+        p_operation.pushIndex(p_index + 1);
+        p_operation.setTarget(p_target);
+        p_operation.setFieldLeft(p_size);
+        p_operation.setFieldProcessed(0);
+        p_operation.setStatus(Operation.Status.INTERRUPTED);
     }
 
     private static void saveState(final Operation p_operation, final Schema.FieldSpec p_fieldSpec, final Object p_target, final int p_index, final int p_size) {
@@ -600,7 +725,6 @@ public final class SchemaSerializer {
 
         switch (fieldSpec.getFieldType()) {
 
-            case BYTE:
             case CHAR:
             case SHORT:
             case INT:
@@ -611,6 +735,54 @@ public final class SchemaSerializer {
                     UNSAFE.putByte(p_buffer, BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(target, fieldSpec.getOffset() + fieldProcessed));
                 }
                 break;
+
+            case BYTE_ARRAY:
+                UNSAFE.copyMemory(target, BYTE_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+            case CHAR_ARRAY:
+                UNSAFE.copyMemory(target, CHAR_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+            case SHORT_ARRAY:
+                UNSAFE.copyMemory(target, SHORT_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+            case INT_ARRAY:
+                UNSAFE.copyMemory(target, INT_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+            case LONG_ARRAY:
+                UNSAFE.copyMemory(target, LONG_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+            case FLOAT_ARRAY:
+                UNSAFE.copyMemory(target, FLOAT_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+            case DOUBLE_ARRAY:
+                UNSAFE.copyMemory(target, DOUBLE_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+            case BOOLEAN_ARRAY:
+                UNSAFE.copyMemory(target, BOOLEAN_ARRAY_OFFSET - Integer.BYTES + fieldProcessed, p_buffer, BYTE_ARRAY_OFFSET + position, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
 
             default:
                 break;
