@@ -3,10 +3,12 @@ package de.hhu.bsinfo.autochunk.demo.schema;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import de.hhu.bsinfo.autochunk.demo.util.FieldType;
+import de.hhu.bsinfo.autochunk.demo.util.FieldUtil;
 import de.hhu.bsinfo.autochunk.demo.util.SizeUtil;
 import de.hhu.bsinfo.autochunk.demo.util.UnsafeProvider;
 
@@ -21,7 +23,7 @@ public class Schema {
     private final Class<?> m_class;
 
     /**
-     * A sorted set containing all field specifications within this schema.
+     * A sorted list containing all field specifications within this schema.
      */
     private final Set<FieldSpec> m_fields = new TreeSet<>(Comparator.comparing(FieldSpec::getName));
 
@@ -78,6 +80,10 @@ public class Schema {
 
         m_fields.add(fieldSpec);
 
+        if (fieldSpec.isArray()) {
+            m_constantSize += Integer.BYTES;
+        }
+
         onFieldsUpdated();
     }
 
@@ -93,8 +99,23 @@ public class Schema {
      * Called whenever the fields of this schema are updated.
      */
     private void onFieldsUpdated() {
+        int arrayCount = (int) m_fields.stream().filter(FieldSpec::isArray).count();
+        m_fieldArray = new FieldSpec[m_fields.size() + arrayCount];
+
+        int i = 0;
+        for (FieldSpec spec : m_fields) {
+            if (spec.isArray()) {
+                m_fieldArray[i++] = new FieldSpec(
+                        FieldType.LENGTH,
+                        SizeUtil.ARRAY_LENGTH_OFFSET,
+                        FieldUtil.ARRAY_LENGTH_NAME,
+                        spec.getField());
+            }
+
+            m_fieldArray[i++] = spec;
+        }
+
         m_isConstant = m_fields.stream().allMatch(FieldSpec::hasConstantSize);
-        m_fieldArray = m_fields.toArray(new FieldSpec[0]);
     }
 
     @Override
@@ -237,6 +258,10 @@ public class Schema {
         @Override
         public String toString() {
             return m_name;
+        }
+
+        public boolean isArray() {
+            return m_fieldType.getId() >= FieldType.BYTE_ARRAY.getId() && m_fieldType.getId() <= FieldType.OBJECT_ARRAY.getId();
         }
     }
 

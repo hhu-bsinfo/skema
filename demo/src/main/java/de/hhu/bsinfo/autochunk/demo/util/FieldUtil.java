@@ -1,6 +1,7 @@
 package de.hhu.bsinfo.autochunk.demo.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 
 import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 
@@ -10,6 +11,8 @@ import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 public final class FieldUtil {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
+
+    public static final String ARRAY_LENGTH_NAME = "length";
 
     private FieldUtil() {}
 
@@ -45,5 +48,4 @@ public final class FieldUtil {
             throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getType().getCanonicalName()));
         }
     }
-
 }

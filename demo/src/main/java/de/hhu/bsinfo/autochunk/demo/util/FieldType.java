@@ -13,8 +13,8 @@ public enum FieldType {
     FLOAT(6, float.class.getCanonicalName(), true),
     DOUBLE(7, double.class.getCanonicalName(), true),
     BOOLEAN(8, boolean.class.getCanonicalName(), true),
-    CHAR_ARRAY(9, char[].class.getCanonicalName(), false),
-    BYTE_ARRAY(10, byte[].class.getCanonicalName(), false),
+    BYTE_ARRAY(9, byte[].class.getCanonicalName(), false),
+    CHAR_ARRAY(10, char[].class.getCanonicalName(), false),
     SHORT_ARRAY(11, short[].class.getCanonicalName(), false),
     INT_ARRAY(12, int[].class.getCanonicalName(), false),
     LONG_ARRAY(13, long[].class.getCanonicalName(), false),
@@ -22,7 +22,8 @@ public enum FieldType {
     DOUBLE_ARRAY(15, double[].class.getCanonicalName(), false),
     BOOLEAN_ARRAY(16, boolean[].class.getCanonicalName(), false),
     OBJECT_ARRAY(17, Object[].class.getCanonicalName(), false),
-    ENUM(18, Enum.class.getCanonicalName(), true);
+    ENUM(18, Enum.class.getCanonicalName(), true),
+    LENGTH(19, HiddenField.class.getCanonicalName(), true);
 
     /**
      * The field type's unique identifier.
@@ -76,5 +77,5 @@ public enum FieldType {
         return m_name;
     }
 
-
+    final static class HiddenField {}
 }

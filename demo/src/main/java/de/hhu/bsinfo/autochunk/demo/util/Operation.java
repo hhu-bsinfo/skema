@@ -28,7 +28,7 @@ public class Operation {
         NONE, INTERRUPTED
     }
 
-    private Object m_result;
+    private Object m_root;
 
     private Object m_target;
 
@@ -61,24 +61,20 @@ public class Operation {
     }
 
     public Operation(Object p_result) {
-        m_result = p_result;
-    }
-
-    public Object getObject() {
-        return m_result;
+        m_root = p_result;
+        m_target = p_result;
     }
 
     public byte[] getBuffer() {
-        return (byte[]) m_result;
+        return (byte[]) m_root;
     }
-
 
     public int getBytesProcessed() {
         return m_bytesProcessed;
     }
 
-    public void setResult(Object p_result) {
-        m_result = p_result;
+    public void setRoot(Object p_root) {
+        m_root = p_root;
     }
 
     public Object getTarget() {
@@ -130,7 +126,7 @@ public class Operation {
     }
 
     public void reset(final Object p_target, final int p_expectedBytes) {
-        m_result = p_target;
+        m_root = p_target;
         m_bytesProcessed = 0;
     }
 
@@ -150,8 +146,8 @@ public class Operation {
         m_arraySize = p_arraySize;
     }
 
-    public Object getResult() {
-        return m_result;
+    public Object getRoot() {
+        return m_root;
     }
 
     public Schema getSchema() {
@@ -168,5 +164,9 @@ public class Operation {
 
     public void setFieldSpec(Schema.FieldSpec p_fieldSpec) {
         m_fieldSpec = p_fieldSpec;
+    }
+
+    public boolean isInterrupted() {
+        return m_status == Status.INTERRUPTED;
     }
 }
