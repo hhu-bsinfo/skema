@@ -77,5 +77,5 @@ public enum FieldType {
         return m_name;
     }
 
-    final static class HiddenField {}
+    private static final class HiddenField {}
 }

@@ -24,6 +24,8 @@ public class Operation {
         }
     }
 
+
+
     public enum Status {
         NONE, INTERRUPTED
     }
@@ -36,7 +38,7 @@ public class Operation {
 
     private Schema.FieldSpec m_fieldSpec;
 
-    private int m_bytesProcessed;
+    private int m_bytesProcessed = 0;
 
     private int m_fieldProcessed = 0;
 
@@ -50,15 +52,7 @@ public class Operation {
 
     private int m_arraySize = 0;
 
-    private boolean m_isArraySizeInitialized = false;
-
-    public boolean isArraySizeInitialized() {
-        return m_isArraySizeInitialized;
-    }
-
-    public void setArraySizeInitialized(boolean p_arraySizeInitialized) {
-        m_isArraySizeInitialized = p_arraySizeInitialized;
-    }
+    private int m_objectArrayIndex = 0;
 
     public Operation(Object p_result) {
         m_root = p_result;
@@ -164,6 +158,14 @@ public class Operation {
 
     public void setFieldSpec(Schema.FieldSpec p_fieldSpec) {
         m_fieldSpec = p_fieldSpec;
+    }
+
+    public int getObjectArrayIndex() {
+        return m_objectArrayIndex;
+    }
+
+    public void setObjectArrayIndex(int p_objectArrayIndex) {
+        m_objectArrayIndex = p_objectArrayIndex;
     }
 
     public boolean isInterrupted() {

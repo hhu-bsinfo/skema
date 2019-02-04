@@ -440,6 +440,7 @@ public final class SchemaSerializer {
         int bytesLeft = p_length;
         int length;
         int size;
+        int j;
 
         Schema.FieldSpec fieldSpec;
         Schema.FieldSpec[] fields = schema.getFields();
@@ -663,17 +664,26 @@ public final class SchemaSerializer {
                     }
                     break;
 
-                // TODO
-                //  create special length field to seperate array and length serialization
-//                case OBJECT_ARRAY:
-//                    array = FieldUtil.getArray(object, fieldSpec);
-//                    UNSAFE.putInt(p_buffer, BYTE_ARRAY_OFFSET + position, array.length);
-//                    position += Integer.BYTES;
-//                    for (j = 0; j < array.length; j++) {
-//                        position += serialize(array[j], p_buffer, position);
-//                    }
-//                    break;
+                case OBJECT_ARRAY:
+                    array = FieldUtil.getArray(object, fieldSpec);
+                    for (j = p_operation.getObjectArrayIndex(); j < array.length; j++) {
+                        p_operation.setRoot(array[j]);
+                        size = serializeNormal(p_operation, p_buffer, position, bytesLeft);
+                        position += size;
+                        bytesLeft -= size;
+                        if (p_operation.isInterrupted()) {
+                            p_operation.setObjectArrayIndex(j);
+                            p_operation.pushIndex(i);
+                            i = fields.length;
+                            j = array.length;
+                        }
+                    }
 
+                    if (!p_operation.isInterrupted()) {
+                        p_operation.setObjectArrayIndex(0);
+                    }
+
+                    break;
 
                 default:
                     break;

@@ -59,6 +59,22 @@ public class PartialTest {
         assertPartialArrayEquals(expected, actual, expected.length);
     }
 
+    @Test
+    public void testNestedSerializeBytes() {
+        NestedObject object = new NestedObject();
+
+        byte[] expected = SchemaSerializer.serialize(object);
+        byte[] actual = new byte[expected.length];
+
+        Operation operation = new Operation(object);
+
+        for (int i = 0; i < expected.length; i++) {
+            SchemaSerializer.serialize(operation, actual, i, 1);
+        }
+
+        assertArrayEquals(expected, actual);
+    }
+
     private static void assertPartialArrayEquals(final byte[] p_expected, final byte[] p_actual, final int p_length) {
         for (int i = 0; i < p_length; i++) {
             assertEquals(String.format("first differed at element %d", i), p_expected[i], p_actual[i]);
