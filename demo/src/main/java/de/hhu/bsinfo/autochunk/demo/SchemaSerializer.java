@@ -14,6 +14,8 @@ import de.hhu.bsinfo.autochunk.demo.util.Operation;
 import de.hhu.bsinfo.autochunk.demo.util.SizeUtil;
 import de.hhu.bsinfo.autochunk.demo.util.UnsafeProvider;
 
+import static de.hhu.bsinfo.autochunk.demo.util.StateUtil.saveState;
+
 @SuppressWarnings("WeakerAccess")
 public final class SchemaSerializer {
 
@@ -66,7 +68,6 @@ public final class SchemaSerializer {
         }
     }
 
-    @SuppressWarnings("SameParameterValue")
     private static synchronized void register(Class<?> p_class, Schema p_schema) {
         SCHEMAS.put(p_class, p_schema);
     }
@@ -426,7 +427,6 @@ public final class SchemaSerializer {
 
     // -------------------------- WORK IN PROGRESS ---------------------------- //
 
-    @Deprecated
     private static int serializeNormal(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
         if (p_length == 0) {
             return 0;
@@ -695,23 +695,6 @@ public final class SchemaSerializer {
         return position - p_offset;
     }
 
-    private static void saveArrayState(final Operation p_operation, final Object p_target, final int p_index, final int p_size) {
-        p_operation.pushIndex(p_index + 1);
-        p_operation.setTarget(p_target);
-        p_operation.setFieldLeft(p_size);
-        p_operation.setFieldProcessed(0);
-        p_operation.setStatus(Operation.Status.INTERRUPTED);
-    }
-
-    private static void saveState(final Operation p_operation, final Schema.FieldSpec p_fieldSpec, final Object p_target, final int p_index, final int p_size) {
-        p_operation.pushIndex(p_index + 1);
-        p_operation.setFieldSpec(p_fieldSpec);
-        p_operation.setTarget(p_target);
-        p_operation.setFieldLeft(p_size);
-        p_operation.setFieldProcessed(0);
-        p_operation.setStatus(Operation.Status.INTERRUPTED);
-    }
-
     private static int serializeInterrupted(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
         if (p_length == 0) {
             return 0;
@@ -815,7 +798,6 @@ public final class SchemaSerializer {
         return position - p_offset;
     }
 
-    @Deprecated
     public static int serialize(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
         if (p_length == 0) {
             return 0;
@@ -838,5 +820,220 @@ public final class SchemaSerializer {
         }
 
         return totalBytes;
+    }
+
+    public static int deserialize(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
+        if (p_length == 0) {
+            return 0;
+        }
+
+        // Try to serialize an interrupted field first
+        int totalBytes = 0;
+        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += deserializeInterrupted(p_operation, p_buffer, p_offset, p_length);
+        }
+
+        // Perform normal serialization if the interruption status has been cleared
+        if (p_operation.getStatus() == Operation.Status.NONE) {
+            totalBytes += deserializeNormal(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
+        }
+
+        // Write interrupted field if normal serialization did not work
+        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += deserializeInterrupted(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
+        }
+
+        return totalBytes;
+    }
+
+    private static int deserializeNormal(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
+        if (p_length == 0) {
+            return 0;
+        }
+
+        Object tmpObject;
+        Object[] array;
+        Object object = p_operation.getRoot();
+        Schema schema = getSchema(object.getClass());
+        int position = p_offset;
+        int bytesLeft = p_length;
+        int length;
+        int size;
+        int j;
+
+        Schema.FieldSpec fieldSpec;
+        Schema.FieldSpec[] fields = schema.getFields();
+
+        int i = p_operation.popIndex();
+        for (; i < fields.length; i++) {
+            fieldSpec = fields[i];
+            switch (fieldSpec.getFieldType()) {
+
+                case BYTE:
+                    UNSAFE.putByte(object, fieldSpec.getOffset(), UNSAFE.getByte(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Byte.BYTES;
+                    bytesLeft -= Byte.BYTES;
+                    break;
+
+                case BOOLEAN:
+                    UNSAFE.putBoolean(object, fieldSpec.getOffset(), UNSAFE.getByte(p_buffer, BYTE_ARRAY_OFFSET + position) == TRUE);
+                    position += Byte.BYTES;
+                    bytesLeft -= Byte.BYTES;
+                    break;
+
+                case CHAR:
+                    if (bytesLeft < Character.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Character.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putChar(object, fieldSpec.getOffset(), UNSAFE.getChar(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Character.BYTES;
+                    bytesLeft -= Character.BYTES;
+                    break;
+
+                case SHORT:
+                    if (bytesLeft < Short.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Short.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putShort(object, fieldSpec.getOffset(), UNSAFE.getShort(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Short.BYTES;
+                    bytesLeft -= Short.BYTES;
+                    break;
+
+                case INT:
+                    if (bytesLeft < Integer.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Integer.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putInt(object, fieldSpec.getOffset(), UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Integer.BYTES;
+                    bytesLeft -= Integer.BYTES;
+                    break;
+
+                case LONG:
+                    if (bytesLeft < Long.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Long.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putLong(object, fieldSpec.getOffset(), UNSAFE.getLong(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Long.BYTES;
+                    bytesLeft -= Long.BYTES;
+                    break;
+
+                case FLOAT:
+                    if (bytesLeft < Float.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Float.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putFloat(object, fieldSpec.getOffset(), UNSAFE.getFloat(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Float.BYTES;
+                    bytesLeft -= Float.BYTES;
+                    break;
+
+                case DOUBLE:
+                    if (bytesLeft < Double.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Double.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putDouble(object, fieldSpec.getOffset(), UNSAFE.getDouble(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Double.BYTES;
+                    bytesLeft -= Double.BYTES;
+                    break;
+
+                case LENGTH:
+                    if (bytesLeft < Integer.BYTES) {
+                        saveState(p_operation, Operation.ARRAY_LENGTH_FIELD, p_operation, i, Integer.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.putInt(p_operation, Operation.ARRAY_LENGTH_FIELD.getOffset(), UNSAFE.getInt(p_buffer, BYTE_ARRAY_OFFSET + position));
+                    position += Integer.BYTES;
+                    bytesLeft -= Integer.BYTES;
+                    break;
+
+                case BYTE_ARRAY:
+                    byte[] bytes = new byte[p_operation.getArrayLength()];
+                    size = bytes.length * Byte.BYTES;
+                    if (bytesLeft < size) {
+                        saveState(p_operation, fieldSpec, bytes, i, size);
+                        i = fields.length;
+                        break;
+                    }
+                    UNSAFE.copyMemory(p_buffer, BYTE_ARRAY_OFFSET + position, bytes, BYTE_ARRAY_OFFSET, size);
+                    UNSAFE.putObject(object, fieldSpec.getOffset(), bytes);
+                    position += size;
+                    bytesLeft -= size;
+                    break;
+            }
+        }
+
+        p_operation.setRoot(object);
+
+        return position - p_offset;
+    }
+
+    private static int deserializeInterrupted(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
+        if (p_length == 0) {
+            return 0;
+        }
+
+        Object target = p_operation.getTarget();
+        Schema.FieldSpec fieldSpec = p_operation.getFieldSpec();
+        int fieldProcessed = p_operation.getFieldProcessed();
+        int fieldLeft = p_operation.getFieldLeft();
+        int position = p_offset;
+        int byteCap;
+
+
+        if (p_length >= fieldLeft) {
+            byteCap = fieldProcessed + fieldLeft;
+        } else {
+            byteCap = fieldProcessed + p_length;
+        }
+
+        switch (fieldSpec.getFieldType()) {
+
+            case CHAR:
+            case SHORT:
+            case INT:
+            case LONG:
+            case FLOAT:
+            case DOUBLE:
+            case LENGTH:
+                for (; fieldProcessed < byteCap; fieldProcessed++, position++, fieldLeft--) {
+                    UNSAFE.putByte(target, fieldSpec.getOffset() + fieldProcessed, UNSAFE.getByte(p_buffer, BYTE_ARRAY_OFFSET + position));
+                }
+                break;
+
+            case BYTE_ARRAY:
+                UNSAFE.copyMemory(p_buffer, BYTE_ARRAY_OFFSET + position, target, BYTE_ARRAY_OFFSET + fieldProcessed, byteCap - fieldProcessed);
+                position += byteCap - fieldProcessed;
+                fieldLeft -= byteCap - fieldProcessed;
+                fieldProcessed += byteCap - fieldProcessed;
+
+                if (fieldLeft == 0) {
+                    UNSAFE.putObject(p_operation.getRoot(), fieldSpec.getOffset(), target);
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        p_operation.setFieldProcessed(fieldProcessed);
+        p_operation.setFieldLeft(fieldLeft);
+
+        if (fieldLeft == 0) {
+            p_operation.setStatus(Operation.Status.NONE);
+        }
+
+        return position - p_offset;
     }
 }

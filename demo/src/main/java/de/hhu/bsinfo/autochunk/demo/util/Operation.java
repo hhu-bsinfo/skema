@@ -6,25 +6,23 @@ import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 
 public class Operation {
 
-    public static final Schema.FieldSpec ARRAY_SIZE_FIELD;
+    public static final Schema.FieldSpec ARRAY_LENGTH_FIELD;
 
     static {
         try {
             sun.misc.Unsafe unsafe = UnsafeProvider.getUnsafe();
-            Field field = Operation.class.getDeclaredField("m_arraySize");
+            Field field = Operation.class.getDeclaredField("m_arrayLength");
             long offset = unsafe.objectFieldOffset(field);
-            ARRAY_SIZE_FIELD = new Schema.FieldSpec(
+            ARRAY_LENGTH_FIELD = new Schema.FieldSpec(
                     FieldType.INT,
                     offset,
-                    "m_arraySize",
+                    "m_arrayLength",
                     field
             );
         } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Could not find array size field", e);
+            throw new RuntimeException("Could not find array length field", e);
         }
     }
-
-
 
     public enum Status {
         NONE, INTERRUPTED
@@ -50,7 +48,7 @@ public class Operation {
 
     private int m_stackPosition = 0;
 
-    private int m_arraySize = 0;
+    private int m_arrayLength = 0;
 
     private int m_objectArrayIndex = 0;
 
@@ -132,12 +130,12 @@ public class Operation {
         m_fieldLeft = p_fieldLeft;
     }
 
-    public int getArraySize() {
-        return m_arraySize;
+    public int getArrayLength() {
+        return m_arrayLength;
     }
 
-    public void setArraySize(int p_arraySize) {
-        m_arraySize = p_arraySize;
+    public void setArrayLength(int p_arrayLength) {
+        m_arrayLength = p_arrayLength;
     }
 
     public Object getRoot() {
