@@ -63,7 +63,7 @@ public class SchemaSerializerBenchmark {
     }
 
     @State(Scope.Thread)
-    public static class SchemaState {
+    public static class SkemaState {
 
         @Param({"0", "1", "2", "3", "4", "5"})
         public int dataIndex;
@@ -96,7 +96,7 @@ public class SchemaSerializerBenchmark {
     @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Threads(1)
-    public byte[] serializeSchema(SchemaState p_state) {
+    public byte[] serializeSkema(SkemaState p_state) {
         int size = p_state.m_scheme.getSize(p_state.data);
         byte[] buffer = new byte[size];
         SchemaSerializer.serialize(p_state.data, buffer);
@@ -109,7 +109,7 @@ public class SchemaSerializerBenchmark {
     @Measurement(iterations = 5, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Threads(1)
-    public Object deserializeSchema(SchemaState p_state) {
+    public Object deserializeSkema(SkemaState p_state) {
         p_state.data = SchemaSerializer.deserialize(p_state.dataClass, p_state.buffer);
         return p_state.data;
     }
