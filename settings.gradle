@@ -1,1 +1,1 @@
-include ':demo'
+rootProject.name = 'skema'
