@@ -1,7 +1,7 @@
 package de.hhu.bsinfo.skema;
 
-import de.hhu.bsinfo.skema.schema.Schema;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.Scheme;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 import de.hhu.bsinfo.skema.util.Constants;
 import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.SizeUtil;
@@ -14,15 +14,15 @@ public final class FullSerializer {
     private FullSerializer() {}
 
     static int serialize(final Object p_object, final byte[] p_buffer, final int p_offset) {
-        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
+        Scheme scheme = SchemeRegistry.getSchema(p_object.getClass());
         int position = p_offset;
         int arraySize = 0;
         int arrayLength = 0;
         int i, j;
         Object object = null;
         Object[] array = null;
-        Schema.FieldSpec[] fields = schema.getFields();
-        Schema.FieldSpec fieldSpec = null;
+        Scheme.FieldSpec[] fields = scheme.getFields();
+        Scheme.FieldSpec fieldSpec = null;
         for (i = 0; i < fields.length; i++) {
             fieldSpec = fields[i];
             switch (fieldSpec.getFieldType()) {

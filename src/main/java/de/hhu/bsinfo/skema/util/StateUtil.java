@@ -1,6 +1,6 @@
 package de.hhu.bsinfo.skema.util;
 
-import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.scheme.Scheme;
 
 public class StateUtil {
 
@@ -12,7 +12,7 @@ public class StateUtil {
         p_operation.setStatus(Operation.Status.INTERRUPTED);
     }
 
-    public static void saveState(final Operation p_operation, final Schema.FieldSpec p_fieldSpec, final Object p_target, final int p_index, final int p_size) {
+    public static void saveState(final Operation p_operation, final Scheme.FieldSpec p_fieldSpec, final Object p_target, final int p_index, final int p_size) {
         p_operation.pushIndex(p_index + 1);
         p_operation.setFieldSpec(p_fieldSpec);
         p_operation.setTarget(p_target);

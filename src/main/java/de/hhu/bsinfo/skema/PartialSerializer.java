@@ -1,7 +1,7 @@
 package de.hhu.bsinfo.skema;
 
-import de.hhu.bsinfo.skema.schema.Schema;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.Scheme;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 import de.hhu.bsinfo.skema.util.Constants;
 import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.Operation;
@@ -20,15 +20,15 @@ public final class PartialSerializer {
         Object tmpObject;
         Object[] array;
         Object object = p_operation.getRoot();
-        Schema schema = SchemaRegistry.getSchema(object.getClass());
+        Scheme scheme = SchemeRegistry.getSchema(object.getClass());
         int position = p_offset;
         int bytesLeft = p_length;
         int length;
         int size;
         int j;
 
-        Schema.FieldSpec fieldSpec;
-        Schema.FieldSpec[] fields = schema.getFields();
+        Scheme.FieldSpec fieldSpec;
+        Scheme.FieldSpec[] fields = scheme.getFields();
 
         int i = p_operation.popIndex();
         for (; i < fields.length; i++) {
@@ -296,7 +296,7 @@ public final class PartialSerializer {
         }
 
         Object target = p_operation.getTarget();
-        Schema.FieldSpec fieldSpec = p_operation.getFieldSpec();
+        Scheme.FieldSpec fieldSpec = p_operation.getFieldSpec();
         int fieldProcessed = p_operation.getFieldProcessed();
         int fieldLeft = p_operation.getFieldLeft();
         int position = p_offset;

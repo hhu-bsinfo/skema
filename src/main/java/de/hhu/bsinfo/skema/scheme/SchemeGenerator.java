@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.skema.schema;
+package de.hhu.bsinfo.skema.scheme;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Used for schema generation of specific classes.
+ * Used for scheme generation of specific classes.
  */
-final class SchemaGenerator {
+final class SchemeGenerator {
 
     private static final String ENUM_VALUES_FIELD = "$VALUES";
 
@@ -17,46 +17,46 @@ final class SchemaGenerator {
 
     private static final int EXCLUDED_MODIFIERS = Modifier.STATIC | Modifier.TRANSIENT;
 
-    private SchemaGenerator() {}
+    private SchemeGenerator() {}
 
     /**
-     * Generates a schema for the specified class.
+     * Generates a scheme for the specified class.
      *
      * @param p_class The class.
-     * @return A schema for the specified class.
+     * @return A scheme for the specified class.
      */
-    public static Schema generate(Class<?> p_class) {
+    public static Scheme generate(Class<?> p_class) {
         if (p_class.isEnum()) {
             return generateEnumSchema(p_class);
         }
 
-        Schema schema = new Schema(p_class);
+        Scheme scheme = new Scheme(p_class);
         Field[] fields = getAllFields(p_class);
         for (Field field : fields) {
             if ((field.getModifiers() & EXCLUDED_MODIFIERS) == 0) {
-                schema.addField(field);
+                scheme.addField(field);
             }
         }
 
-        return schema;
+        return scheme;
     }
 
-    private static Schema generateEnumSchema(Class<?> p_class) {
-        Schema schema = new Schema(p_class);
+    private static Scheme generateEnumSchema(Class<?> p_class) {
+        Scheme scheme = new Scheme(p_class);
 
         Enum[] enumConstants = getEnumConstants(p_class);
         for (Enum constant : enumConstants) {
-            schema.addEnumConstant(constant);
+            scheme.addEnumConstant(constant);
         }
 
         Field[] fields = getAllFields(p_class);
         for (Field field : fields) {
             if (field.getName().equals(ENUM_ORDINAL_FIELD)) {
-                schema.addField(field);
+                scheme.addField(field);
             }
         }
 
-        return schema;
+        return scheme;
     }
 
     static Field[] getAllFields(Class<?> p_class) {

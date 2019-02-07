@@ -1,16 +1,16 @@
 package de.hhu.bsinfo.skema;
 
 import de.hhu.bsinfo.skema.data.Measurement;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 
 public class Profiler {
 
     public static void main(String args[]) {
-        SchemaRegistry.register(Measurement.class);
+        SchemeRegistry.register(Measurement.class);
 
         Measurement input = new Measurement(42, 827.13, 0);
         Measurement output = new Measurement(0, 0.0, 0);
-        int size = SchemaRegistry.getSchema(Measurement.class).getSize(input);
+        int size = SchemeRegistry.getSchema(Measurement.class).getSize(input);
         byte[] bytes = new byte[size];
         int x = 0;
 

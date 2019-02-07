@@ -1,7 +1,7 @@
 package de.hhu.bsinfo.skema;
 
 import de.hhu.bsinfo.skema.data.TextMessage;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -12,7 +12,7 @@ public class PolymorphicTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaRegistry.register(TextMessage.class);
+        SchemeRegistry.register(TextMessage.class);
     }
 
     @Test

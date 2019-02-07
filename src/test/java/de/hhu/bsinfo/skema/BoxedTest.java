@@ -4,7 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.hhu.bsinfo.skema.data.BoxedCollection;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +12,7 @@ public class BoxedTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaRegistry.register(BoxedCollection.class);
+        SchemeRegistry.register(BoxedCollection.class);
     }
 
     @Test

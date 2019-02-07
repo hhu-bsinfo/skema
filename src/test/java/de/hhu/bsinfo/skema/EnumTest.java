@@ -2,7 +2,7 @@ package de.hhu.bsinfo.skema;
 
 import de.hhu.bsinfo.skema.data.Result;
 import de.hhu.bsinfo.skema.data.Status;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,8 +13,8 @@ public class EnumTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaRegistry.register(Status.class);
-        SchemaRegistry.register(Result.class);
+        SchemeRegistry.register(Status.class);
+        SchemeRegistry.register(Result.class);
     }
 
     @Test

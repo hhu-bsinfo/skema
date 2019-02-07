@@ -9,26 +9,26 @@ import com.esotericsoftware.kryo.io.UnsafeOutput;
 import de.hhu.bsinfo.skema.data.*;
 import org.openjdk.jmh.annotations.*;
 
-import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.scheme.Scheme;
 import de.hhu.bsinfo.skema.data.BoxedCollection;
 import de.hhu.bsinfo.skema.data.PrimitiveCollection;
 import de.hhu.bsinfo.skema.data.Result;
 import de.hhu.bsinfo.skema.data.Status;
 import de.hhu.bsinfo.skema.data.Timestamp;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 
 import org.openjdk.jmh.annotations.Measurement;
 
 public class SchemaSerializerBenchmark {
 
     static {
-        SchemaRegistry.register(Timestamp.class);
-        SchemaRegistry.register(de.hhu.bsinfo.skema.data.Measurement.class);
-        SchemaRegistry.register(PrimitiveCollection.class);
-        SchemaRegistry.register(BoxedCollection.class);
-        SchemaRegistry.register(Status.class);
-        SchemaRegistry.register(Result.class);
-        SchemaRegistry.register(Profile.class);
+        SchemeRegistry.register(Timestamp.class);
+        SchemeRegistry.register(de.hhu.bsinfo.skema.data.Measurement.class);
+        SchemeRegistry.register(PrimitiveCollection.class);
+        SchemeRegistry.register(BoxedCollection.class);
+        SchemeRegistry.register(Status.class);
+        SchemeRegistry.register(Result.class);
+        SchemeRegistry.register(Profile.class);
     }
 
     @State(Scope.Thread)
@@ -74,14 +74,14 @@ public class SchemaSerializerBenchmark {
         public Class<?> dataClass;
 
         public byte[] buffer;
-        public Schema schema;
+        public Scheme m_scheme;
 
         @Setup(Level.Trial)
         public void setup() {
             data = dataSource.get(dataIndex);
             dataClass = data.getClass();
-            schema = SchemaRegistry.getSchema(dataClass);
-            buffer = new byte[schema.getSize(data)];
+            m_scheme = SchemeRegistry.getSchema(dataClass);
+            buffer = new byte[m_scheme.getSize(data)];
         }
 
         @TearDown(Level.Trial)
@@ -97,7 +97,7 @@ public class SchemaSerializerBenchmark {
     @OutputTimeUnit(TimeUnit.SECONDS)
     @Threads(1)
     public byte[] serializeSchema(SchemaState p_state) {
-        int size = p_state.schema.getSize(p_state.data);
+        int size = p_state.m_scheme.getSize(p_state.data);
         byte[] buffer = new byte[size];
         SchemaSerializer.serialize(p_state.data, buffer);
         return buffer;

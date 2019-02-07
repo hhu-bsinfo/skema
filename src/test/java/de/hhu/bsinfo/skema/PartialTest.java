@@ -7,7 +7,7 @@ import de.hhu.bsinfo.skema.data.BoxedCollection;
 import de.hhu.bsinfo.skema.data.NestedObject;
 import de.hhu.bsinfo.skema.data.PrimitiveCollection;
 import de.hhu.bsinfo.skema.data.TestClass;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 import de.hhu.bsinfo.skema.util.ClassUtil;
 import de.hhu.bsinfo.skema.util.Operation;
 
@@ -18,10 +18,10 @@ public class PartialTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaRegistry.register(PrimitiveCollection.class);
-        SchemaRegistry.register(BoxedCollection.class);
-        SchemaRegistry.register(NestedObject.class);
-        SchemaRegistry.register(TestClass.class);
+        SchemeRegistry.register(PrimitiveCollection.class);
+        SchemeRegistry.register(BoxedCollection.class);
+        SchemeRegistry.register(NestedObject.class);
+        SchemeRegistry.register(TestClass.class);
     }
 
     @Test

@@ -4,7 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.hhu.bsinfo.skema.data.PrimitiveCollection;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +12,7 @@ public class PrimitiveTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaRegistry.register(PrimitiveCollection.class);
+        SchemeRegistry.register(PrimitiveCollection.class);
     }
 
     @Test

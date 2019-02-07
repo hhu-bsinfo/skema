@@ -2,7 +2,7 @@ package de.hhu.bsinfo.skema.util;
 
 import java.lang.reflect.Array;
 
-import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.scheme.Scheme;
 
 /**
  * Utility class for retrieving and creating instances from field specifications.
@@ -15,15 +15,15 @@ public final class FieldUtil {
 
     private FieldUtil() {}
 
-    public static Object getObject(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
+    public static Object getObject(final Object p_object, final Scheme.FieldSpec p_fieldSpec) {
         return UNSAFE.getObject(p_object, p_fieldSpec.getOffset());
     }
 
-    public static Object[] getArray(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
+    public static Object[] getArray(final Object p_object, final Scheme.FieldSpec p_fieldSpec) {
         return (Object[]) getObject(p_object, p_fieldSpec);
     }
 
-    public static Object allocateInstance(final Schema.FieldSpec p_fieldSpec) {
+    public static Object allocateInstance(final Scheme.FieldSpec p_fieldSpec) {
         try {
             return UNSAFE.allocateInstance(p_fieldSpec.getType());
         } catch (InstantiationException e) {
@@ -31,11 +31,11 @@ public final class FieldUtil {
         }
     }
 
-    public static Object[] allocateArray(final Schema.FieldSpec p_fieldSpec, final int p_length) {
+    public static Object[] allocateArray(final Scheme.FieldSpec p_fieldSpec, final int p_length) {
         return (Object[]) Array.newInstance(p_fieldSpec.getType().getComponentType(), p_length);
     }
 
-    public static Object allocateComponent(final Schema.FieldSpec p_fieldSpec) {
+    public static Object allocateComponent(final Scheme.FieldSpec p_fieldSpec) {
         try {
             return UNSAFE.allocateInstance(p_fieldSpec.getType().getComponentType());
         } catch (InstantiationException p_e) {
@@ -43,7 +43,7 @@ public final class FieldUtil {
         }
     }
 
-    public static Object getOrAllocateObject(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
+    public static Object getOrAllocateObject(final Object p_object, final Scheme.FieldSpec p_fieldSpec) {
         Object object = getObject(p_object, p_fieldSpec);
         if (object == null) {
             object = allocateInstance(p_fieldSpec);
@@ -52,7 +52,7 @@ public final class FieldUtil {
         return object;
     }
 
-    public static Object[] getOrAllocateArray(final Object p_object, final Schema.FieldSpec p_fieldSpec, final int p_length) {
+    public static Object[] getOrAllocateArray(final Object p_object, final Scheme.FieldSpec p_fieldSpec, final int p_length) {
         Object[] object = getArray(p_object, p_fieldSpec);
         if (object == null) {
             object = allocateArray(p_fieldSpec, p_length);
@@ -61,7 +61,7 @@ public final class FieldUtil {
         return object;
     }
 
-    public static Object getOrAllocateComponent(final Object[] p_array, final Schema.FieldSpec p_fieldSpec, final int p_index) {
+    public static Object getOrAllocateComponent(final Object[] p_array, final Scheme.FieldSpec p_fieldSpec, final int p_index) {
         Object object = p_array[p_index];
         if (object == null) {
             object = allocateComponent(p_fieldSpec);

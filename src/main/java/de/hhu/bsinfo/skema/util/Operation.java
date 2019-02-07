@@ -2,18 +2,18 @@ package de.hhu.bsinfo.skema.util;
 
 import java.lang.reflect.Field;
 
-import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.scheme.Scheme;
 
 public class Operation {
 
-    public static final Schema.FieldSpec ARRAY_LENGTH_FIELD;
+    public static final Scheme.FieldSpec ARRAY_LENGTH_FIELD;
 
     static {
         try {
             sun.misc.Unsafe unsafe = UnsafeProvider.getUnsafe();
             Field field = Operation.class.getDeclaredField("m_arrayLength");
             long offset = unsafe.objectFieldOffset(field);
-            ARRAY_LENGTH_FIELD = new Schema.FieldSpec(
+            ARRAY_LENGTH_FIELD = new Scheme.FieldSpec(
                     FieldType.INT,
                     offset,
                     "m_arrayLength",
@@ -34,9 +34,9 @@ public class Operation {
 
     private Object m_parent;
 
-    private Schema m_schema;
+    private Scheme m_scheme;
 
-    private Schema.FieldSpec m_fieldSpec;
+    private Scheme.FieldSpec m_fieldSpec;
 
     private int m_bytesProcessed = 0;
 
@@ -152,19 +152,19 @@ public class Operation {
         return m_root;
     }
 
-    public Schema getSchema() {
-        return m_schema;
+    public Scheme getScheme() {
+        return m_scheme;
     }
 
-    public void setSchema(Schema p_schema) {
-        m_schema = p_schema;
+    public void setScheme(Scheme p_scheme) {
+        m_scheme = p_scheme;
     }
 
-    public Schema.FieldSpec getFieldSpec() {
+    public Scheme.FieldSpec getFieldSpec() {
         return m_fieldSpec;
     }
 
-    public void setFieldSpec(Schema.FieldSpec p_fieldSpec) {
+    public void setFieldSpec(Scheme.FieldSpec p_fieldSpec) {
         m_fieldSpec = p_fieldSpec;
     }
 

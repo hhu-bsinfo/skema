@@ -11,7 +11,7 @@ import de.hhu.bsinfo.skema.data.Measurement;
 import de.hhu.bsinfo.skema.data.Profile;
 import de.hhu.bsinfo.skema.data.Storyboard;
 import de.hhu.bsinfo.skema.data.Timestamp;
-import de.hhu.bsinfo.skema.schema.SchemaRegistry;
+import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
 
 import static org.junit.Assert.*;
 
@@ -33,10 +33,10 @@ public class SerializerTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaRegistry.register(Profile.class);
-        SchemaRegistry.register(Storyboard.class);
-        SchemaRegistry.register(Timestamp.class);
-        SchemaRegistry.register(Measurement.class);
+        SchemeRegistry.register(Profile.class);
+        SchemeRegistry.register(Storyboard.class);
+        SchemeRegistry.register(Timestamp.class);
+        SchemeRegistry.register(Measurement.class);
     }
 
     @Test
