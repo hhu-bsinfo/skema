@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import de.hhu.bsinfo.autochunk.demo.data.BoxedCollection;
 import de.hhu.bsinfo.autochunk.demo.data.PrimitiveCollection;
+import de.hhu.bsinfo.autochunk.demo.schema.SchemaRegistry;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +13,7 @@ public class BoxedTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaSerializer.register(BoxedCollection.class);
+        SchemaRegistry.register(BoxedCollection.class);
     }
 
     @Test

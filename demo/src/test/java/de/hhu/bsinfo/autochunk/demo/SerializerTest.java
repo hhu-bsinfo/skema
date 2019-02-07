@@ -16,6 +16,7 @@ import de.hhu.bsinfo.autochunk.demo.data.Measurement;
 import de.hhu.bsinfo.autochunk.demo.data.Profile;
 import de.hhu.bsinfo.autochunk.demo.data.Storyboard;
 import de.hhu.bsinfo.autochunk.demo.data.Timestamp;
+import de.hhu.bsinfo.autochunk.demo.schema.SchemaRegistry;
 
 import static org.junit.Assert.*;
 
@@ -37,10 +38,10 @@ public class SerializerTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaSerializer.register(Profile.class);
-        SchemaSerializer.register(Storyboard.class);
-        SchemaSerializer.register(Timestamp.class);
-        SchemaSerializer.register(Measurement.class);
+        SchemaRegistry.register(Profile.class);
+        SchemaRegistry.register(Storyboard.class);
+        SchemaRegistry.register(Timestamp.class);
+        SchemaRegistry.register(Measurement.class);
     }
 
     @Test

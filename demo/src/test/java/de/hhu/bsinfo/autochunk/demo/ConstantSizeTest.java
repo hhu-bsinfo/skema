@@ -7,6 +7,7 @@ import de.hhu.bsinfo.autochunk.demo.data.Measurement;
 import de.hhu.bsinfo.autochunk.demo.data.Profile;
 import de.hhu.bsinfo.autochunk.demo.data.Storyboard;
 import de.hhu.bsinfo.autochunk.demo.data.Timestamp;
+import de.hhu.bsinfo.autochunk.demo.schema.SchemaRegistry;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -15,22 +16,22 @@ public class ConstantSizeTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaSerializer.register(Profile.class);
-        SchemaSerializer.register(Storyboard.class);
-        SchemaSerializer.register(Timestamp.class);
-        SchemaSerializer.register(Measurement.class);
+        SchemaRegistry.register(Profile.class);
+        SchemaRegistry.register(Storyboard.class);
+        SchemaRegistry.register(Timestamp.class);
+        SchemaRegistry.register(Measurement.class);
     }
 
     @Test
     public void testConstantSize() {
-        assertTrue(SchemaSerializer.getSchema(Measurement.class).isConstant());
-        assertTrue(SchemaSerializer.getSchema(Storyboard.class).isConstant());
+        assertTrue(SchemaRegistry.getSchema(Measurement.class).isConstant());
+        assertTrue(SchemaRegistry.getSchema(Storyboard.class).isConstant());
     }
 
     @Test
     public void testDynamicSize() {
-        assertFalse(SchemaSerializer.getSchema(Profile.class).isConstant());
-        assertFalse(SchemaSerializer.getSchema(Timestamp.class).isConstant());
+        assertFalse(SchemaRegistry.getSchema(Profile.class).isConstant());
+        assertFalse(SchemaRegistry.getSchema(Timestamp.class).isConstant());
     }
 
 }

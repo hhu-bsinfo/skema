@@ -2,6 +2,7 @@ package de.hhu.bsinfo.autochunk.demo.util;
 
 import de.hhu.bsinfo.autochunk.demo.schema.Schema;
 import de.hhu.bsinfo.autochunk.demo.SchemaSerializer;
+import de.hhu.bsinfo.autochunk.demo.schema.SchemaRegistry;
 
 /**
  * Utility class for calculating the size of fields within various objects.
@@ -47,7 +48,7 @@ public final class SizeUtil {
 
     public static int getObjectArraySize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
         Object[] array = (Object[]) FieldUtil.getObject(p_object, p_fieldSpec);
-        Schema schema = SchemaSerializer.getSchema(array[0].getClass());
+        Schema schema = SchemaRegistry.getSchema(array[0].getClass());
 
         if (schema.isConstant()) {
             return array.length * schema.getConstantSize();
@@ -69,7 +70,7 @@ public final class SizeUtil {
      */
     public static int getObjectSize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
         Object object = FieldUtil.getObject(p_object, p_fieldSpec);
-        Schema schema = SchemaSerializer.getSchema(object.getClass());
+        Schema schema = SchemaRegistry.getSchema(object.getClass());
         return schema.getSize(object);
     }
 

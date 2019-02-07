@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.autochunk.demo;
+package de.hhu.bsinfo.autochunk.demo.schema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -28,7 +28,7 @@ final class SchemaGenerator {
      * @param p_class The class.
      * @return A schema for the specified class.
      */
-    static Schema generate(Class<?> p_class) {
+    public static Schema generate(Class<?> p_class) {
         if (p_class.isEnum()) {
             return generateEnumSchema(p_class);
         }
@@ -44,7 +44,7 @@ final class SchemaGenerator {
         return schema;
     }
 
-    static Schema generateEnumSchema(Class<?> p_class) {
+    private static Schema generateEnumSchema(Class<?> p_class) {
         Schema schema = new Schema(p_class);
 
         Enum[] enumConstants = getEnumConstants(p_class);

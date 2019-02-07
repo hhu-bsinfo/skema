@@ -32,6 +32,8 @@ public class Operation {
 
     private Object m_target;
 
+    private Object m_parent;
+
     private Schema m_schema;
 
     private Schema.FieldSpec m_fieldSpec;
@@ -83,6 +85,14 @@ public class Operation {
 
     public void addCurrentBytes(int p_bytesProcessed) {
         m_bytesProcessed += p_bytesProcessed;
+    }
+
+    public Object getParent() {
+        return m_parent;
+    }
+
+    public void setParent(Object p_parent) {
+        m_parent = p_parent;
     }
 
     public Status getStatus() {

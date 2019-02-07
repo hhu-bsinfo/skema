@@ -17,12 +17,7 @@ public final class FieldUtil {
     private FieldUtil() {}
 
     public static Object getObject(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        try {
-            return p_fieldSpec.getField().get(p_object);
-        } catch (IllegalAccessException e) {
-            // This should never happen since all fields have been made accessible
-            throw new IllegalStateException(String.format("Field %s is not accessible", p_fieldSpec.getName()));
-        }
+        return UNSAFE.getObject(p_object, p_fieldSpec.getOffset());
     }
 
     public static Object[] getArray(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
@@ -47,5 +42,32 @@ public final class FieldUtil {
         } catch (InstantiationException p_e) {
             throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getType().getCanonicalName()));
         }
+    }
+
+    public static Object getOrAllocateObject(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
+        Object object = getObject(p_object, p_fieldSpec);
+        if (object == null) {
+            object = allocateInstance(p_fieldSpec);
+            UNSAFE.putObject(p_object, p_fieldSpec.getOffset(), object);
+        }
+        return object;
+    }
+
+    public static Object[] getOrAllocateArray(final Object p_object, final Schema.FieldSpec p_fieldSpec, final int p_length) {
+        Object[] object = getArray(p_object, p_fieldSpec);
+        if (object == null) {
+            object = allocateArray(p_fieldSpec, p_length);
+            UNSAFE.putObject(p_object, p_fieldSpec.getOffset(), object);
+        }
+        return object;
+    }
+
+    public static Object getOrAllocateComponent(final Object[] p_array, final Schema.FieldSpec p_fieldSpec, final int p_index) {
+        Object object = p_array[p_index];
+        if (object == null) {
+            object = allocateComponent(p_fieldSpec);
+            p_array[p_index] = object;
+        }
+        return object;
     }
 }

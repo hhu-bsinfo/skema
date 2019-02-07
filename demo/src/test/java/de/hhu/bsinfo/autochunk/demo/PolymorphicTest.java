@@ -2,6 +2,8 @@ package de.hhu.bsinfo.autochunk.demo;
 
 import de.hhu.bsinfo.autochunk.demo.data.PrimitiveCollection;
 import de.hhu.bsinfo.autochunk.demo.data.TextMessage;
+import de.hhu.bsinfo.autochunk.demo.schema.SchemaRegistry;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -11,7 +13,7 @@ public class PolymorphicTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaSerializer.register(TextMessage.class);
+        SchemaRegistry.register(TextMessage.class);
     }
 
     @Test

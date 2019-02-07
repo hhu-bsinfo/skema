@@ -3,6 +3,7 @@ package de.hhu.bsinfo.autochunk.demo;
 import de.hhu.bsinfo.autochunk.demo.data.Result;
 import de.hhu.bsinfo.autochunk.demo.data.Status;
 import de.hhu.bsinfo.autochunk.demo.data.TextMessage;
+import de.hhu.bsinfo.autochunk.demo.schema.SchemaRegistry;
 import de.hhu.bsinfo.autochunk.demo.util.UnsafeProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,8 +16,8 @@ public class EnumTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaSerializer.register(Status.class);
-        SchemaSerializer.register(Result.class);
+        SchemaRegistry.register(Status.class);
+        SchemaRegistry.register(Result.class);
     }
 
     @Test

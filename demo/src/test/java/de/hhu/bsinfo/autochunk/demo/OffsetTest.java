@@ -4,6 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.hhu.bsinfo.autochunk.demo.data.PrimitiveCollection;
+import de.hhu.bsinfo.autochunk.demo.schema.SchemaRegistry;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,7 +14,7 @@ public class OffsetTest {
 
     @BeforeClass
     public static void setup() {
-        SchemaSerializer.register(PrimitiveCollection.class);
+        SchemaRegistry.register(PrimitiveCollection.class);
     }
 
     @Test

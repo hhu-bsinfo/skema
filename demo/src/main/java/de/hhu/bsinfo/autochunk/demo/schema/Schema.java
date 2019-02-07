@@ -107,7 +107,7 @@ public class Schema {
             if (spec.isArray()) {
                 m_fieldArray[i++] = new FieldSpec(
                         FieldType.LENGTH,
-                        SizeUtil.ARRAY_LENGTH_OFFSET,
+                        spec.getOffset(),
                         FieldUtil.ARRAY_LENGTH_NAME,
                         spec.getField());
             }
