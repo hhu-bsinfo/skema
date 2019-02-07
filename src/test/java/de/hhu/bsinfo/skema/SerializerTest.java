@@ -33,10 +33,7 @@ public class SerializerTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.register(Profile.class);
-        SchemeRegistry.register(Storyboard.class);
-        SchemeRegistry.register(Timestamp.class);
-        SchemeRegistry.register(Measurement.class);
+        SchemeRegistry.enableAutoRegistration();
     }
 
     @Test

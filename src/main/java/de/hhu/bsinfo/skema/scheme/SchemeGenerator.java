@@ -26,6 +26,10 @@ final class SchemeGenerator {
      * @return A scheme for the specified class.
      */
     public static Scheme generate(Class<?> p_class) {
+        if (p_class.equals(Object.class)) {
+            throw new IllegalArgumentException(String.format("Generating scheme for %s is not supported", p_class.getCanonicalName()));
+        }
+
         if (p_class.isEnum()) {
             return generateEnumSchema(p_class);
         }

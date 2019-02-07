@@ -12,7 +12,7 @@ public class PrimitiveTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.register(PrimitiveCollection.class);
+        SchemeRegistry.enableAutoRegistration();
     }
 
     @Test

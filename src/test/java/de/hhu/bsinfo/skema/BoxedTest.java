@@ -12,7 +12,7 @@ public class BoxedTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.register(BoxedCollection.class);
+        SchemeRegistry.enableAutoRegistration();
     }
 
     @Test

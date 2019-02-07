@@ -18,10 +18,7 @@ public class PartialTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.register(PrimitiveCollection.class);
-        SchemeRegistry.register(BoxedCollection.class);
-        SchemeRegistry.register(NestedObject.class);
-        SchemeRegistry.register(TestClass.class);
+        SchemeRegistry.enableAutoRegistration();
     }
 
     @Test

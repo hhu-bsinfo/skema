@@ -13,8 +13,7 @@ public class EnumTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.register(Status.class);
-        SchemeRegistry.register(Result.class);
+        SchemeRegistry.enableAutoRegistration();
     }
 
     @Test

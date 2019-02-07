@@ -13,7 +13,9 @@ import java.util.UUID;
 
 public final class SchemeRegistry {
 
-    private static final Map<Class<?>, Scheme> SCHEMAS = new HashMap<>();
+    private static final Map<Class<?>, Scheme> SCHEMES = new HashMap<>();
+
+    private static boolean m_isAutoRegistrationEnabled = false;
 
     static {
         register(
@@ -35,24 +37,42 @@ public final class SchemeRegistry {
         );
     }
 
-    public static synchronized void register(Class<?> p_class) {
-        SCHEMAS.put(p_class, SchemeGenerator.generate(p_class));
+    public static synchronized Scheme register(Class<?> p_class) {
+        Scheme scheme = SchemeGenerator.generate(p_class);
+        SCHEMES.put(p_class, scheme);
+        return scheme;
     }
 
     private static synchronized void register(Scheme... p_scheme) {
         for (Scheme scheme : p_scheme) {
-            SCHEMAS.put(scheme.getTarget(), scheme);
+            SCHEMES.put(scheme.getTarget(), scheme);
         }
     }
 
+    public static void enableAutoRegistration() {
+        m_isAutoRegistrationEnabled = true;
+    }
+
+    public static void disableAutoRegistration() {
+        m_isAutoRegistrationEnabled = false;
+    }
+
     private static synchronized void register(Class<?> p_class, Scheme p_scheme) {
-        SCHEMAS.put(p_class, p_scheme);
+        SCHEMES.put(p_class, p_scheme);
     }
 
     private SchemeRegistry() {}
 
     public static Scheme getSchema(Class<?> p_class) {
-        Scheme scheme = SCHEMAS.get(p_class);
+        Scheme scheme = SCHEMES.get(p_class);
+
+        if (scheme != null) {
+            return scheme;
+        }
+
+        if (m_isAutoRegistrationEnabled) {
+            scheme = register(p_class);
+        }
 
         if (scheme == null) {
             throw new IllegalArgumentException(String.format("No scheme for class %s was registered",

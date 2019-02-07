@@ -12,7 +12,7 @@ public class PolymorphicTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.register(TextMessage.class);
+        SchemeRegistry.enableAutoRegistration();
     }
 
     @Test
