@@ -28,30 +28,23 @@ public class Operation {
         NONE, INTERRUPTED
     }
 
+    private Status m_status = Status.NONE;
+
     private Object m_root;
-
     private Object m_target;
-
     private Object m_parent;
 
     private Scheme m_scheme;
-
     private Scheme.FieldSpec m_fieldSpec;
 
     private int m_bytesProcessed = 0;
-
     private int m_fieldProcessed = 0;
-
     private int m_fieldLeft = 0;
 
-    private Status m_status = Status.NONE;
-
     private final int[] m_indexStack = new int[128];
-
     private int m_stackPosition = 0;
 
     private int m_arrayLength = 0;
-
     private int m_objectArrayIndex = 0;
 
     public Operation(Object p_result) {

@@ -19,6 +19,10 @@ public final class SchemaSerializer {
         return buffer;
     }
 
+    public static int serialize(final Object p_object, final long p_address) {
+        return FullSerializer.serialize(p_object, p_address);
+    }
+
     public static int serialize(final Object p_object, final byte[] p_buffer) {
         return FullSerializer.serialize(p_object, p_buffer, 0);
     }
@@ -29,6 +33,20 @@ public final class SchemaSerializer {
 
     public static <T> T deserialize(final Class<T> p_class, final byte[] p_buffer) {
         return deserialize(p_class, p_buffer, 0);
+    }
+
+    public static <T> T deserialize(final Class<T> p_class, final long p_address) {
+        if (p_class.isEnum()) {
+            return FullDeserializer.deserializeEnum(p_class, p_address);
+        }
+
+        try {
+            Object object = UNSAFE.allocateInstance(p_class);
+            FullDeserializer.deserialize(object, p_address);
+            return p_class.cast(object);
+        } catch (InstantiationException e) {
+            return null;
+        }
     }
 
     public static <T> T deserialize(final Class<T> p_class, final byte[] p_buffer, final int p_offset) {
