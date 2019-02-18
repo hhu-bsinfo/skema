@@ -1,24 +1,26 @@
 package de.hhu.bsinfo.skema;
 
-import de.hhu.bsinfo.skema.scheme.Scheme;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.Constants;
 import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
-public class FullDeserializer {
+final class FullDeserializer {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
 
+    private FullDeserializer() {}
+
     static int deserialize(final Object p_object, final byte[] p_buffer, final int p_offset) {
-        Scheme scheme = SchemeRegistry.getSchema(p_object.getClass());
+        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
         int position = p_offset;
         int arrayLength = 0;
         int i, j;
         Object object = null;
         Object[] array = null;
-        Scheme.FieldSpec[] fields = scheme.getFields();
-        Scheme.FieldSpec fieldSpec = null;
+        Schema.FieldSpec[] fields = schema.getFields();
+        Schema.FieldSpec fieldSpec = null;
         for (i = 0; i < fields.length; i++) {
             fieldSpec = fields[i];
             switch (fieldSpec.getFieldType()) {
@@ -161,14 +163,14 @@ public class FullDeserializer {
     }
 
     static int deserialize(final Object p_object, final long p_address) {
-        Scheme scheme = SchemeRegistry.getSchema(p_object.getClass());
+        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
         long position = p_address;
         int arrayLength = 0;
         int i, j;
         Object object = null;
         Object[] array = null;
-        Scheme.FieldSpec[] fields = scheme.getFields();
-        Scheme.FieldSpec fieldSpec = null;
+        Schema.FieldSpec[] fields = schema.getFields();
+        Schema.FieldSpec fieldSpec = null;
         for (i = 0; i < fields.length; i++) {
             fieldSpec = fields[i];
             switch (fieldSpec.getFieldType()) {
@@ -315,26 +317,26 @@ public class FullDeserializer {
     }
 
     static <T> T deserializeEnum(final Class<T> p_class, final byte[] p_buffer, final int p_offset) {
-        Scheme scheme = SchemeRegistry.getSchema(p_class);
+        Schema schema = SchemaRegistry.getSchema(p_class);
         final int ordinal = UNSAFE.getInt(p_buffer, Constants.BYTE_ARRAY_OFFSET + p_offset);
-        return p_class.cast(scheme.getEnumConstant(ordinal));
+        return p_class.cast(schema.getEnumConstant(ordinal));
     }
 
     static <T> T deserializeEnum(final Class<T> p_class, final long p_address) {
-        Scheme scheme = SchemeRegistry.getSchema(p_class);
+        Schema schema = SchemaRegistry.getSchema(p_class);
         final int ordinal = UNSAFE.getInt(p_address);
-        return p_class.cast(scheme.getEnumConstant(ordinal));
+        return p_class.cast(schema.getEnumConstant(ordinal));
     }
 
-    static Object deserializeEnum(final Scheme.FieldSpec p_fieldSpec, final byte[] p_buffer, final int p_offset) {
-        Scheme scheme = SchemeRegistry.getSchema(p_fieldSpec.getType());
+    static Object deserializeEnum(final Schema.FieldSpec p_fieldSpec, final byte[] p_buffer, final int p_offset) {
+        Schema schema = SchemaRegistry.getSchema(p_fieldSpec.getType());
         final int ordinal = UNSAFE.getInt(p_buffer, Constants.BYTE_ARRAY_OFFSET + p_offset);
-        return scheme.getEnumConstant(ordinal);
+        return schema.getEnumConstant(ordinal);
     }
 
-    static Object deserializeEnum(final Scheme.FieldSpec p_fieldSpec, final long p_address) {
-        Scheme scheme = SchemeRegistry.getSchema(p_fieldSpec.getType());
+    static Object deserializeEnum(final Schema.FieldSpec p_fieldSpec, final long p_address) {
+        Schema schema = SchemaRegistry.getSchema(p_fieldSpec.getType());
         final int ordinal = UNSAFE.getInt(p_address);
-        return scheme.getEnumConstant(ordinal);
+        return schema.getEnumConstant(ordinal);
     }
 }

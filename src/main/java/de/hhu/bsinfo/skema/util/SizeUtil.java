@@ -1,7 +1,7 @@
 package de.hhu.bsinfo.skema.util;
 
-import de.hhu.bsinfo.skema.scheme.Scheme;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 
 /**
  * Utility class for calculating the size of fields within various objects.
@@ -45,17 +45,17 @@ public final class SizeUtil {
 
     private SizeUtil() {}
 
-    public static int getObjectArraySize(final Object p_object, final Scheme.FieldSpec p_fieldSpec) {
+    public static int getObjectArraySize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
         Object[] array = (Object[]) FieldUtil.getObject(p_object, p_fieldSpec);
-        Scheme scheme = SchemeRegistry.getSchema(array[0].getClass());
+        Schema schema = SchemaRegistry.getSchema(array[0].getClass());
 
-        if (scheme.isConstant()) {
-            return array.length * scheme.getConstantSize();
+        if (schema.isConstant()) {
+            return array.length * schema.getConstantSize();
         }
 
         int size = 0;
         for (Object object : array) {
-            size += scheme.getSize(object);
+            size += schema.getSize(object);
         }
         return size;
     }
@@ -67,10 +67,10 @@ public final class SizeUtil {
      * @param p_fieldSpec The object's field specification.
      * @return The size in bytes.
      */
-    public static int getObjectSize(final Object p_object, final Scheme.FieldSpec p_fieldSpec) {
+    public static int getObjectSize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
         Object object = FieldUtil.getObject(p_object, p_fieldSpec);
-        Scheme scheme = SchemeRegistry.getSchema(object.getClass());
-        return scheme.getSize(object);
+        Schema schema = SchemaRegistry.getSchema(object.getClass());
+        return schema.getSize(object);
     }
 
     /**
@@ -80,7 +80,7 @@ public final class SizeUtil {
      * @param p_fieldSpec The field specification.
      * @return The array's size in bytes.
      */
-    public static int getArraySize(final Object p_object, final Scheme.FieldSpec p_fieldSpec) {
+    public static int getArraySize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
         Object array = FieldUtil.getObject(p_object, p_fieldSpec);
         return getArraySize(getArrayLength(array), p_fieldSpec);
     }
@@ -96,7 +96,7 @@ public final class SizeUtil {
      * @param p_fieldSpec The array's field specification.
      * @return The array's size in bytes.
      */
-    public static int getArraySize(final int p_length, final Scheme.FieldSpec p_fieldSpec) {
+    public static int getArraySize(final int p_length, final Schema.FieldSpec p_fieldSpec) {
         switch (p_fieldSpec.getFieldType()) {
             case BYTE_ARRAY:
                 return p_length * Byte.BYTES;
@@ -119,11 +119,11 @@ public final class SizeUtil {
         }
     }
 
-    public static int sizeOf(final Object p_object, final Scheme.FieldSpec p_fieldSpec) {
+    public static int sizeOf(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
         return SIZE_FUNCTIONS[p_fieldSpec.getFieldType().getId()].sizeOf(p_object, p_fieldSpec);
     }
 
-    public static int constantSizeOf(final Scheme.FieldSpec p_fieldSpec) {
+    public static int constantSizeOf(final Schema.FieldSpec p_fieldSpec) {
         if (!p_fieldSpec.hasConstantSize()) {
             return NO_SIZE;
         }

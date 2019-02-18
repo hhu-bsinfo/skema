@@ -1,20 +1,20 @@
 package de.hhu.bsinfo.skema;
 
-import de.hhu.bsinfo.skema.scheme.Scheme;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.Operation;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
 @SuppressWarnings("WeakerAccess")
-public final class SchemaSerializer {
+public final class Skema {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
 
-    private SchemaSerializer() {}
+    private Skema() {}
 
     public static byte[] serialize(final Object p_object) {
-        Scheme scheme = SchemeRegistry.getSchema(p_object.getClass());
-        byte[] buffer = new byte[scheme.getSize(p_object)];
+        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
+        byte[] buffer = new byte[schema.getSize(p_object)];
         serialize(p_object, buffer);
         return buffer;
     }

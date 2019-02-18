@@ -4,10 +4,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.hhu.bsinfo.skema.data.BoxedCollection;
-import de.hhu.bsinfo.skema.data.NestedObject;
 import de.hhu.bsinfo.skema.data.PrimitiveCollection;
-import de.hhu.bsinfo.skema.data.TestClass;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.ClassUtil;
 import de.hhu.bsinfo.skema.util.Operation;
 
@@ -18,20 +16,20 @@ public class PartialTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.enableAutoRegistration();
+        SchemaRegistry.enableAutoRegistration();
     }
 
     @Test
     public void testNonNestedSerialize() {
         PrimitiveCollection object = new PrimitiveCollection();
 
-        byte[] expected = SchemaSerializer.serialize(object);
+        byte[] expected = Skema.serialize(object);
         byte[] actual = new byte[expected.length];
 
         Operation operation = new Operation(object);
 
         for (int i = 0; i < expected.length; i++) {
-            SchemaSerializer.serialize(operation, actual, i, 1);
+            Skema.serialize(operation, actual, i, 1);
         }
 
         assertArrayEquals(expected, actual);
@@ -41,13 +39,13 @@ public class PartialTest {
     public void testNestedSerialize() {
         BoxedCollection object = new BoxedCollection();
 
-        byte[] expected = SchemaSerializer.serialize(object);
+        byte[] expected = Skema.serialize(object);
         byte[] actual = new byte[expected.length];
 
         Operation operation = new Operation(object);
 
         for (int i = 0; i < expected.length; i++) {
-            SchemaSerializer.serialize(operation, actual, i, 1);
+            Skema.serialize(operation, actual, i, 1);
         }
 
         assertArrayEquals(expected, actual);
@@ -58,12 +56,12 @@ public class PartialTest {
         PrimitiveCollection expected = new PrimitiveCollection();
         PrimitiveCollection actual = ClassUtil.allocateInstance(PrimitiveCollection.class);
 
-        byte[] bytes = SchemaSerializer.serialize(expected);
+        byte[] bytes = Skema.serialize(expected);
 
         Operation operation = new Operation(actual);
 
         for (int i = 0; i < bytes.length; i++) {
-            SchemaSerializer.deserialize(operation, bytes, i, 1);
+            Skema.deserialize(operation, bytes, i, 1);
         }
 
         assertEquals(expected, actual);
@@ -74,12 +72,12 @@ public class PartialTest {
         BoxedCollection expected = new BoxedCollection();
         BoxedCollection actual = ClassUtil.allocateInstance(BoxedCollection.class);
 
-        byte[] bytes = SchemaSerializer.serialize(expected);
+        byte[] bytes = Skema.serialize(expected);
 
         Operation operation = new Operation(actual);
 
         for (int i = 0; i < bytes.length; i++) {
-            SchemaSerializer.deserialize(operation, bytes, i, 1);
+            Skema.deserialize(operation, bytes, i, 1);
         }
 
         assertEquals(expected, actual);

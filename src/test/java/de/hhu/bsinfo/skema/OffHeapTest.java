@@ -4,8 +4,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.hhu.bsinfo.skema.data.PrimitiveCollection;
-import de.hhu.bsinfo.skema.scheme.Scheme;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
 import static org.junit.Assert.assertEquals;
@@ -16,27 +16,29 @@ public class OffHeapTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.enableAutoRegistration();
+        SchemaRegistry.enableAutoRegistration();
     }
 
     @Test
     public void testSerialization() {
 
-        Scheme scheme = SchemeRegistry.getSchema(PrimitiveCollection.class);
+        Schema schema = SchemaRegistry.getSchema(PrimitiveCollection.class);
 
         PrimitiveCollection collection = new PrimitiveCollection();
 
-        int size = scheme.getSize(collection);
+        int size = schema.getSize(collection);
 
         long address = UNSAFE.allocateMemory(size);
 
-        int bytesWritten = SchemaSerializer.serialize(collection, address);
+        int bytesWritten = Skema.serialize(collection, address);
 
         assertEquals(size, bytesWritten);
 
-        PrimitiveCollection result = SchemaSerializer.deserialize(PrimitiveCollection.class, address);
+        PrimitiveCollection result = Skema.deserialize(PrimitiveCollection.class, address);
 
         assertEquals(collection, result);
+
+        UNSAFE.freeMemory(address);
     }
 
 

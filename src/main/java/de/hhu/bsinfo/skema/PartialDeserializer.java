@@ -1,15 +1,15 @@
 package de.hhu.bsinfo.skema;
 
-import de.hhu.bsinfo.skema.scheme.Scheme;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.Constants;
 import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.Operation;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
-import static de.hhu.bsinfo.skema.util.StateUtil.saveState;
+import static de.hhu.bsinfo.skema.util.OperationUtil.saveState;
 
-public final class PartialDeserializer {
+final class PartialDeserializer {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
 
@@ -19,14 +19,14 @@ public final class PartialDeserializer {
         Object tmpObject;
         Object[] array;
         Object object = p_operation.getRoot();
-        Scheme scheme = SchemeRegistry.getSchema(object.getClass());
+        Schema schema = SchemaRegistry.getSchema(object.getClass());
         int position = p_offset;
         int bytesLeft = p_length;
         int size;
         int j;
 
-        Scheme.FieldSpec fieldSpec;
-        Scheme.FieldSpec[] fields = scheme.getFields();
+        Schema.FieldSpec fieldSpec;
+        Schema.FieldSpec[] fields = schema.getFields();
 
         int i = p_operation.popIndex();
         for (; i < fields.length; i++) {
@@ -123,17 +123,17 @@ public final class PartialDeserializer {
 
                 case LENGTH:
                     if (bytesLeft < Integer.BYTES) {
-                        saveState(p_operation, Operation.ARRAY_LENGTH_FIELD, p_operation, i, Integer.BYTES);
+                        saveState(p_operation, Operation.TMP_VALUE_FIELD, p_operation, i, Integer.BYTES);
                         i = fields.length;
                         break;
                     }
-                    UNSAFE.putInt(p_operation, Operation.ARRAY_LENGTH_FIELD.getOffset(), UNSAFE.getInt(p_buffer, Constants.BYTE_ARRAY_OFFSET + position));
+                    UNSAFE.putInt(p_operation, Operation.TMP_VALUE_FIELD.getOffset(), UNSAFE.getInt(p_buffer, Constants.BYTE_ARRAY_OFFSET + position));
                     position += Integer.BYTES;
                     bytesLeft -= Integer.BYTES;
                     break;
 
                 case BYTE_ARRAY:
-                    byte[] bytes = new byte[p_operation.getArrayLength()];
+                    byte[] bytes = new byte[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), bytes);
                     size = bytes.length * Byte.BYTES;
                     if (bytesLeft < size) {
@@ -148,7 +148,7 @@ public final class PartialDeserializer {
                     break;
 
                 case CHAR_ARRAY:
-                    char[] chars = new char[p_operation.getArrayLength()];
+                    char[] chars = new char[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), chars);
                     size = chars.length * Character.BYTES;
                     if (bytesLeft < size) {
@@ -163,7 +163,7 @@ public final class PartialDeserializer {
                     break;
 
                 case SHORT_ARRAY:
-                    short[] shorts = new short[p_operation.getArrayLength()];
+                    short[] shorts = new short[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), shorts);
                     size = shorts.length * Short.BYTES;
                     if (bytesLeft < size) {
@@ -178,7 +178,7 @@ public final class PartialDeserializer {
                     break;
 
                 case INT_ARRAY:
-                    int[] ints = new int[p_operation.getArrayLength()];
+                    int[] ints = new int[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), ints);
                     size = ints.length * Integer.BYTES;
                     if (bytesLeft < size) {
@@ -193,7 +193,7 @@ public final class PartialDeserializer {
                     break;
 
                 case LONG_ARRAY:
-                    long[] longs = new long[p_operation.getArrayLength()];
+                    long[] longs = new long[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), longs);
                     size = longs.length * Long.BYTES;
                     if (bytesLeft < size) {
@@ -208,7 +208,7 @@ public final class PartialDeserializer {
                     break;
 
                 case FLOAT_ARRAY:
-                    float[] floats = new float[p_operation.getArrayLength()];
+                    float[] floats = new float[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), floats);
                     size = floats.length * Float.BYTES;
                     if (bytesLeft < size) {
@@ -223,7 +223,7 @@ public final class PartialDeserializer {
                     break;
 
                 case DOUBLE_ARRAY:
-                    double[] doubles = new double[p_operation.getArrayLength()];
+                    double[] doubles = new double[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), doubles);
                     size = doubles.length * Double.BYTES;
                     if (bytesLeft < size) {
@@ -238,7 +238,7 @@ public final class PartialDeserializer {
                     break;
 
                 case BOOLEAN_ARRAY:
-                    boolean[] booleans = new boolean[p_operation.getArrayLength()];
+                    boolean[] booleans = new boolean[p_operation.getTmpValue()];
                     UNSAFE.putObject(object, fieldSpec.getOffset(), booleans);
                     size = booleans.length * Byte.BYTES;
                     if (bytesLeft < size) {
@@ -250,6 +250,18 @@ public final class PartialDeserializer {
                     UNSAFE.copyMemory(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, booleans, Constants.BOOLEAN_ARRAY_OFFSET, size);
                     position += size;
                     bytesLeft -= size;
+                    break;
+
+                case ENUM:
+                    if (bytesLeft < Integer.BYTES) {
+                        saveState(p_operation, fieldSpec, object, i, Integer.BYTES);
+                        i = fields.length;
+                        break;
+                    }
+                    tmpObject = deserializeEnum(fieldSpec, p_buffer, p_offset);
+                    UNSAFE.putObject(object, fieldSpec.getOffset(), tmpObject);
+                    position += Integer.BYTES;
+                    bytesLeft -= Integer.BYTES;
                     break;
 
                 case OBJECT:
@@ -265,7 +277,7 @@ public final class PartialDeserializer {
                     break;
 
                 case OBJECT_ARRAY:
-                    array = FieldUtil.getOrAllocateArray(object, fieldSpec, p_operation.getArrayLength());
+                    array = FieldUtil.getOrAllocateArray(object, fieldSpec, p_operation.getTmpValue());
                     for (j = p_operation.getObjectArrayIndex(); j < array.length; j++) {
                         p_operation.setRoot(FieldUtil.getOrAllocateComponent(array, fieldSpec, j));
                         size = deserializeNormal(p_operation, p_buffer, position, bytesLeft);
@@ -298,7 +310,7 @@ public final class PartialDeserializer {
         }
 
         Object target = p_operation.getTarget();
-        Scheme.FieldSpec fieldSpec = p_operation.getFieldSpec();
+        Schema.FieldSpec fieldSpec = p_operation.getFieldSpec();
         int fieldProcessed = p_operation.getFieldProcessed();
         int fieldLeft = p_operation.getFieldLeft();
         int position = p_offset;
@@ -412,6 +424,15 @@ public final class PartialDeserializer {
                 }
                 break;
 
+            case ENUM:
+                for (; fieldProcessed < byteCap; fieldProcessed++, position++, fieldLeft--) {
+                    UNSAFE.putByte(p_operation, Operation.TMP_VALUE_FIELD.getOffset() + fieldProcessed, UNSAFE.getByte(p_buffer, Constants.BYTE_ARRAY_OFFSET + position));
+                }
+                if (fieldLeft == 0) {
+                    UNSAFE.putObject(p_operation.getTarget(), fieldSpec.getOffset() , deserializeEnum(fieldSpec, p_operation.getTmpValue()));
+                }
+                break;
+
             default:
                 break;
         }
@@ -424,5 +445,15 @@ public final class PartialDeserializer {
         }
 
         return position - p_offset;
+    }
+
+    static Object deserializeEnum(final Schema.FieldSpec p_fieldSpec, final int p_ordinal) {
+        return SchemaRegistry.getSchema(p_fieldSpec.getType()).getEnumConstant(p_ordinal);
+    }
+
+    static Object deserializeEnum(final Schema.FieldSpec p_fieldSpec, final byte[] p_buffer, final int p_offset) {
+        Schema schema = SchemaRegistry.getSchema(p_fieldSpec.getType());
+        final int ordinal = UNSAFE.getInt(p_buffer, Constants.BYTE_ARRAY_OFFSET + p_offset);
+        return schema.getEnumConstant(ordinal);
     }
 }

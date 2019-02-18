@@ -9,9 +9,8 @@ import org.junit.runners.Parameterized;
 
 import de.hhu.bsinfo.skema.data.Measurement;
 import de.hhu.bsinfo.skema.data.Profile;
-import de.hhu.bsinfo.skema.data.Storyboard;
 import de.hhu.bsinfo.skema.data.Timestamp;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 
 import static org.junit.Assert.*;
 
@@ -33,13 +32,13 @@ public class SerializerTest {
 
     @BeforeClass
     public static void setup() {
-        SchemeRegistry.enableAutoRegistration();
+        SchemaRegistry.enableAutoRegistration();
     }
 
     @Test
     public void testSerialize() {
-        byte[] bytes = SchemaSerializer.serialize(m_object);
-        Object object = SchemaSerializer.deserialize(m_object.getClass(), bytes);
+        byte[] bytes = Skema.serialize(m_object);
+        Object object = Skema.deserialize(m_object.getClass(), bytes);
         assertEquals(m_object, object);
     }
 

@@ -1,16 +1,16 @@
 package de.hhu.bsinfo.skema;
 
-import de.hhu.bsinfo.skema.scheme.Scheme;
-import de.hhu.bsinfo.skema.scheme.SchemeRegistry;
+import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.Constants;
 import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.Operation;
 import de.hhu.bsinfo.skema.util.SizeUtil;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
-import static de.hhu.bsinfo.skema.util.StateUtil.saveState;
+import static de.hhu.bsinfo.skema.util.OperationUtil.saveState;
 
-public final class PartialSerializer {
+final class PartialSerializer {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
 
@@ -20,15 +20,15 @@ public final class PartialSerializer {
         Object tmpObject;
         Object[] array;
         Object object = p_operation.getRoot();
-        Scheme scheme = SchemeRegistry.getSchema(object.getClass());
+        Schema schema = SchemaRegistry.getSchema(object.getClass());
         int position = p_offset;
         int bytesLeft = p_length;
         int length;
         int size;
         int j;
 
-        Scheme.FieldSpec fieldSpec;
-        Scheme.FieldSpec[] fields = scheme.getFields();
+        Schema.FieldSpec fieldSpec;
+        Schema.FieldSpec[] fields = schema.getFields();
 
         int i = p_operation.popIndex();
         for (; i < fields.length; i++) {
@@ -247,6 +247,7 @@ public final class PartialSerializer {
                     bytesLeft -= size;
                     break;
 
+                case ENUM:
                 case OBJECT:
                     tmpObject = FieldUtil.getObject(object, fieldSpec);
                     p_operation.setRoot(tmpObject);
@@ -296,7 +297,7 @@ public final class PartialSerializer {
         }
 
         Object target = p_operation.getTarget();
-        Scheme.FieldSpec fieldSpec = p_operation.getFieldSpec();
+        Schema.FieldSpec fieldSpec = p_operation.getFieldSpec();
         int fieldProcessed = p_operation.getFieldProcessed();
         int fieldLeft = p_operation.getFieldLeft();
         int position = p_offset;

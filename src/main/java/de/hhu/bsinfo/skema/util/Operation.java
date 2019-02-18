@@ -2,21 +2,21 @@ package de.hhu.bsinfo.skema.util;
 
 import java.lang.reflect.Field;
 
-import de.hhu.bsinfo.skema.scheme.Scheme;
+import de.hhu.bsinfo.skema.schema.Schema;
 
 public class Operation {
 
-    public static final Scheme.FieldSpec ARRAY_LENGTH_FIELD;
+    public static final Schema.FieldSpec TMP_VALUE_FIELD;
 
     static {
         try {
             sun.misc.Unsafe unsafe = UnsafeProvider.getUnsafe();
-            Field field = Operation.class.getDeclaredField("m_arrayLength");
+            Field field = Operation.class.getDeclaredField("m_tmpValue");
             long offset = unsafe.objectFieldOffset(field);
-            ARRAY_LENGTH_FIELD = new Scheme.FieldSpec(
+            TMP_VALUE_FIELD = new Schema.FieldSpec(
                     FieldType.INT,
                     offset,
-                    "m_arrayLength",
+                    "m_tmpValue",
                     field
             );
         } catch (NoSuchFieldException e) {
@@ -34,8 +34,9 @@ public class Operation {
     private Object m_target;
     private Object m_parent;
 
-    private Scheme m_scheme;
-    private Scheme.FieldSpec m_fieldSpec;
+    private Schema m_schema;
+    private Schema.FieldSpec m_fieldSpec;
+    private Schema.FieldSpec m_parentFieldSpec;
 
     private int m_bytesProcessed = 0;
     private int m_fieldProcessed = 0;
@@ -44,7 +45,7 @@ public class Operation {
     private final int[] m_indexStack = new int[128];
     private int m_stackPosition = 0;
 
-    private int m_arrayLength = 0;
+    private int m_tmpValue = 0;
     private int m_objectArrayIndex = 0;
 
     public Operation(Object p_result) {
@@ -84,8 +85,13 @@ public class Operation {
         return m_parent;
     }
 
-    public void setParent(Object p_parent) {
+    public void setParent(final Object p_parent) {
         m_parent = p_parent;
+    }
+
+    public void setParent(final Object p_parent, final Schema.FieldSpec p_fieldSpec) {
+        m_parent = p_parent;
+        m_parentFieldSpec = p_fieldSpec;
     }
 
     public Status getStatus() {
@@ -133,31 +139,31 @@ public class Operation {
         m_fieldLeft = p_fieldLeft;
     }
 
-    public int getArrayLength() {
-        return m_arrayLength;
+    public int getTmpValue() {
+        return m_tmpValue;
     }
 
-    public void setArrayLength(int p_arrayLength) {
-        m_arrayLength = p_arrayLength;
+    public void setTmpValue(int p_tmpValue) {
+        m_tmpValue = p_tmpValue;
     }
 
     public Object getRoot() {
         return m_root;
     }
 
-    public Scheme getScheme() {
-        return m_scheme;
+    public Schema getSchema() {
+        return m_schema;
     }
 
-    public void setScheme(Scheme p_scheme) {
-        m_scheme = p_scheme;
+    public void setSchema(Schema p_schema) {
+        m_schema = p_schema;
     }
 
-    public Scheme.FieldSpec getFieldSpec() {
+    public Schema.FieldSpec getFieldSpec() {
         return m_fieldSpec;
     }
 
-    public void setFieldSpec(Scheme.FieldSpec p_fieldSpec) {
+    public void setFieldSpec(Schema.FieldSpec p_fieldSpec) {
         m_fieldSpec = p_fieldSpec;
     }
 
@@ -167,6 +173,14 @@ public class Operation {
 
     public void setObjectArrayIndex(int p_objectArrayIndex) {
         m_objectArrayIndex = p_objectArrayIndex;
+    }
+
+    public Schema.FieldSpec getParentFieldSpec() {
+        return m_parentFieldSpec;
+    }
+
+    public void setParentFieldSpec(Schema.FieldSpec p_parentFieldSpec) {
+        m_parentFieldSpec = p_parentFieldSpec;
     }
 
     public boolean isInterrupted() {

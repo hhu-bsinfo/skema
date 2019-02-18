@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.skema.scheme;
+package de.hhu.bsinfo.skema.schema;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -14,15 +14,15 @@ import de.hhu.bsinfo.skema.util.UnsafeProvider;
 /**
  * Describes the structure of a specific class.
  */
-public class Scheme {
+public class Schema {
 
     /**
-     * The class this scheme describes.
+     * The class this schema describes.
      */
     private final Class<?> m_class;
 
     /**
-     * A sorted list containing all field specifications within this scheme.
+     * A sorted list containing all field specifications within this schema.
      */
     private final Set<FieldSpec> m_fields = new TreeSet<>(Comparator.comparing(FieldSpec::getName));
 
@@ -32,36 +32,36 @@ public class Scheme {
     private FieldSpec[] m_fieldArray = null;
 
     /**
-     * The unsafe instance for scheme generation.
+     * The unsafe instance for schema generation.
      */
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
 
     /**
-     * The constant size of the class this scheme describes.
+     * The constant size of the class this schema describes.
      */
     private int m_constantSize = 0;
 
     /**
-     * Indicates if all fields contained within this scheme and all children schemes have a constant size.
+     * Indicates if all fields contained within this schema and all children schemas have a constant size.
      */
     private boolean m_isConstant = false;
 
     /**
-     * All enum constants if this scheme describes an enum.
+     * All enum constants if this schema describes an enum.
      */
     private final ArrayList<Enum> m_enumConstants = new ArrayList<>();
 
     /**
-     * Creates a new Scheme instance for the provided class.
+     * Creates a new Schema instance for the provided class.
      *
-     * @param p_class The class described by this scheme instance.
+     * @param p_class The class described by this schema instance.
      */
-    public Scheme(final Class<?> p_class) {
+    public Schema(final Class<?> p_class) {
         m_class = p_class;
     }
 
     /**
-     * Adds a new field to this scheme.
+     * Adds a new field to this schema.
      *
      * @param p_field The field to add.
      */
@@ -95,7 +95,7 @@ public class Scheme {
     }
 
     /**
-     * Called whenever the fields of this scheme are updated.
+     * Called whenever the fields of this schema are updated.
      */
     private void onFieldsUpdated() {
         int arrayCount = (int) m_fields.stream().filter(FieldSpec::isArray).count();
@@ -141,16 +141,16 @@ public class Scheme {
     }
 
     /**
-     * Returns a set containing all field specifications within this scheme.
+     * Returns a set containing all field specifications within this schema.
      *
-     * @return A set containing all field specifications within this scheme.
+     * @return A set containing all field specifications within this schema.
      */
     public FieldSpec[] getFields() {
         return m_fieldArray;
     }
 
     /**
-     * Calculates an object's size using this scheme.
+     * Calculates an object's size using this schema.
      *
      * @param p_object The object.
      * @return The object's size in bytes.
