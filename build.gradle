@@ -4,31 +4,13 @@ buildscript {
     }
 }
 
-plugins {
-    id 'me.champeau.gradle.jmh' version '0.4.7'
-    id 'java'
-}
-
-compileJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
-}
-
-group = 'de.hhu.bsinfo.skema'
-
-repositories {
-    jcenter()
-}
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    testImplementation 'org.hamcrest:hamcrest-core:2.1'
-    testImplementation 'junit:junit:4.12'
-
-    jmh 'com.esotericsoftware:kryo:4.0.2'
+allprojects {
+    repositories {
+        jcenter()
+    }
 }
 
 wrapper {
     gradleVersion = "5.2"
 }
+
