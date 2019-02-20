@@ -94,6 +94,10 @@ public class Schema {
         return m_enumConstants.get(p_ordinal);
     }
 
+    public int getEnumCount() {
+        return m_enumConstants.size();
+    }
+
     /**
      * Called whenever the fields of this schema are updated.
      */

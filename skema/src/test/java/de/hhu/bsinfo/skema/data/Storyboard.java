@@ -1,7 +1,5 @@
 package de.hhu.bsinfo.skema.data;
 
-import de.hhu.bsinfo.skema.util.RandomUtil;
-
 public class Storyboard {
 
     private final long m_id;
@@ -23,10 +21,6 @@ public class Storyboard {
 
     public int getPostCount() {
         return m_postCount;
-    }
-
-    public static Storyboard random() {
-        return new Storyboard(RandomUtil.randomLong(), RandomUtil.randomInt());
     }
 
     @Override

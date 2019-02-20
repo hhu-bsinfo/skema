@@ -11,7 +11,10 @@ public class Constants {
     public static final long DOUBLE_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(double[].class);
     public static final long BOOLEAN_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(boolean[].class);
     public static final long OBJECT_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(Object[].class);
+    public static final long NO_OFFSET = 0;
+
     public static final int REFERENCE_SIZE = UNSAFE.arrayIndexScale(Object[].class);
+
     public static final byte TRUE = 1;
     public static final byte FALSE = 0;
 }

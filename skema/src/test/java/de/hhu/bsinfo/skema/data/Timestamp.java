@@ -1,7 +1,5 @@
 package de.hhu.bsinfo.skema.data;
 
-import de.hhu.bsinfo.skema.util.RandomUtil;
-
 public class Timestamp {
 
     private final int m_id;
@@ -55,10 +53,6 @@ public class Timestamp {
     @Override
     public int hashCode() {
         return Integer.hashCode(m_id);
-    }
-
-    public static Timestamp random() {
-        return new Timestamp(RandomUtil.randomInt(), RandomUtil.randomLong(), RandomUtil.randomIntArray(128), RandomUtil.randomLongArray(128));
     }
 
     @Override

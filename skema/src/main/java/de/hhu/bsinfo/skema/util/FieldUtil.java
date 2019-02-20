@@ -1,8 +1,11 @@
 package de.hhu.bsinfo.skema.util;
 
 import java.lang.reflect.Array;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.hhu.bsinfo.skema.schema.Schema;
+import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 
 /**
  * Utility class for retrieving and creating instances from field specifications.
@@ -68,5 +71,33 @@ public final class FieldUtil {
             p_array[p_index] = object;
         }
         return object;
+    }
+
+    public static Object randomArray(final Schema.FieldSpec p_fieldSpec, final int p_length, final Random p_random) {
+        if (!p_fieldSpec.isArray() || p_fieldSpec.getFieldType() == FieldType.OBJECT_ARRAY) {
+            return null;
+        }
+
+        // Create an array and calculate its size in bytes
+        Object array = Array.newInstance(p_fieldSpec.getType().getComponentType(), p_length);
+        int size = SizeUtil.getArraySize(p_length, p_fieldSpec);
+
+        // Create an array containing random bytes
+        byte[] randomBytes = new byte[size];
+        p_random.nextBytes(randomBytes);
+
+        // Copy random bytes into target array
+        UNSAFE.copyMemory(randomBytes, 0, array, p_fieldSpec.getFieldType().getBaseOffset(), size);
+
+        return array;
+    }
+
+    public static Object randomEnum(final Schema.FieldSpec p_fieldSpec, final Random p_random) {
+        return randomEnum(p_fieldSpec.getType(), p_random);
+    }
+
+    public static Object randomEnum(final Class<?> p_class, final Random p_random) {
+        Schema schema = SchemaRegistry.getSchema(p_class);
+        return schema.getEnumConstant(p_random.nextInt(schema.getEnumCount()));
     }
 }

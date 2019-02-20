@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+group = 'de.hhu.bsinfo.skema'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':skema')
+    implementation 'io.netty:netty-all:4.1.33.Final'
+}

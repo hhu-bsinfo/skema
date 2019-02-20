@@ -1,1 +1,1 @@
-include ':skema'
+include ':skema', ':examples'

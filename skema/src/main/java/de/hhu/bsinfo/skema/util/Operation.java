@@ -131,6 +131,19 @@ public class Operation {
         m_bytesProcessed = 0;
     }
 
+    public void rewind() {
+        m_target = m_root;
+        m_bytesProcessed = 0;
+        m_fieldProcessed = 0;
+        m_fieldLeft = 0;
+        m_stackPosition = 0;
+        m_tmpValue = 0;
+        m_objectArrayIndex = 0;
+        m_schema = null;
+        m_fieldSpec = null;
+        m_parentFieldSpec = null;
+    }
+
     public int getFieldLeft() {
         return m_fieldLeft;
     }

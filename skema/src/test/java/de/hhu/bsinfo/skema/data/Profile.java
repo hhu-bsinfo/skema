@@ -2,8 +2,6 @@ package de.hhu.bsinfo.skema.data;
 
 import java.util.Arrays;
 
-import de.hhu.bsinfo.skema.util.RandomUtil;
-
 public class Profile {
 
     private final long m_id;
@@ -47,10 +45,6 @@ public class Profile {
 
     public String getLastname() {
         return m_lastname;
-    }
-
-    public static Profile random() {
-        return new Profile(RandomUtil.randomLong(), "John", "Doe", RandomUtil.randomLongArray(128), Storyboard.random());
     }
 
     @Override

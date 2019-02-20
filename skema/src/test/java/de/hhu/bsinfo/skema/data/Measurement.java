@@ -1,7 +1,5 @@
 package de.hhu.bsinfo.skema.data;
 
-import de.hhu.bsinfo.skema.util.RandomUtil;
-
 public class Measurement {
 
     private final long m_id;
@@ -44,10 +42,6 @@ public class Measurement {
     @Override
     public int hashCode() {
         return Double.hashCode(m_id);
-    }
-
-    public static Measurement random() {
-        return new Measurement(RandomUtil.randomLong(), RandomUtil.randomDouble(), RandomUtil.randomLong());
     }
 
     @Override
