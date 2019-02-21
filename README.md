@@ -17,6 +17,7 @@ Other versions may work but are __not__ supported officially.
  * On-the-fly schema generation for unregistered classes
  * [Random instance initialization](skema/src/test/java/de/hhu/bsinfo/skema/random/ObjectGeneratorTest.java)
  * [Partial serialization and deserialization](skema/src/test/java/de/hhu/bsinfo/skema/SerializerTest.java)
+ * Optional off-heap memory usage
  * No implementation needed
  * Simple API
 
