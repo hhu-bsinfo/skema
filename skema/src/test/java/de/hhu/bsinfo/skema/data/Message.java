@@ -6,6 +6,11 @@ public class Message {
 
     private final short m_receiverId;
 
+    public Message() {
+        m_senderId = 0;
+        m_receiverId = 0;
+    }
+
     public Message(short m_senderId, short m_receiverId) {
         this.m_senderId = m_senderId;
         this.m_receiverId = m_receiverId;

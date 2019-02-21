@@ -4,6 +4,11 @@ public class TextMessage extends Message {
 
     private final String m_content;
 
+    public TextMessage() {
+        super();
+        m_content = null;
+    }
+
     public TextMessage(short m_senderId, short m_receiverId, String m_content) {
         super(m_senderId, m_receiverId);
         this.m_content = m_content;
