@@ -14,6 +14,7 @@ import de.hhu.bsinfo.skema.util.UnsafeProvider;
 /**
  * Describes the structure of a specific class.
  */
+@SuppressWarnings("sunapi")
 public class Schema {
 
     /**

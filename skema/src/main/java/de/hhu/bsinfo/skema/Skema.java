@@ -11,7 +11,7 @@ import de.hhu.bsinfo.skema.util.ClassUtil;
 import de.hhu.bsinfo.skema.util.Operation;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "sunapi"})
 public final class Skema {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();

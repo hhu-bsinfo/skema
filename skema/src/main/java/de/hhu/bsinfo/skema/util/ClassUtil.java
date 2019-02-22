@@ -3,6 +3,7 @@ package de.hhu.bsinfo.skema.util;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("sunapi")
 public class ClassUtil {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();

@@ -1,6 +1,9 @@
 plugins {
     id 'me.champeau.gradle.jmh' version '0.4.8'
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.4'
+    id "com.jfrog.artifactory" version '4.7.5'
 }
 
 compileJava {
@@ -9,18 +12,35 @@ compileJava {
 }
 
 group = 'de.hhu.bsinfo.skema'
+version = '1.0.0' + (Boolean.valueOf(System.getProperty('release')) ? '' : '-SNAPSHOT')
 
 repositories {
-    jcenter()
+    mavenCentral()
+
+    maven {
+        url "https://dl.bintray.com/hhu-bsinfo/dxram"
+    }
+
+    maven {
+        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
+    }
 }
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ["-Werror", "-Xlint:sunapi", "-XDenableSunApiLintControl"]
+}
 
-    testImplementation 'org.hamcrest:hamcrest-core:2.1'
-    testImplementation 'junit:junit:4.12'
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-    jmh 'com.esotericsoftware:kryo:4.0.2'
+javadoc.failOnError = false
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 task benchmarkJar(type: Jar, dependsOn: jmhJar) {
@@ -33,3 +53,21 @@ task benchmarkJar(type: Jar, dependsOn: jmhJar) {
                 .collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation 'org.hamcrest:hamcrest-core:2.1'
+    testImplementation 'junit:junit:4.12'
+
+    jmh 'com.esotericsoftware:kryo:4.0.2'
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+apply from: 'publish.gradle'
+apply from: 'bintray.gradle'
+apply from: 'artifactory.gradle'

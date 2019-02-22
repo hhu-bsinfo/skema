@@ -10,6 +10,7 @@ import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
 import static de.hhu.bsinfo.skema.util.OperationUtil.saveState;
 
+@SuppressWarnings("sunapi")
 final class PartialSerializer {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();

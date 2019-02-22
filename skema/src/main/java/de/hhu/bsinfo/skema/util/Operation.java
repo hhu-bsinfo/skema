@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import de.hhu.bsinfo.skema.schema.Schema;
 
+@SuppressWarnings("sunapi")
 public class Operation {
 
     public static final Schema.FieldSpec TMP_VALUE_FIELD;

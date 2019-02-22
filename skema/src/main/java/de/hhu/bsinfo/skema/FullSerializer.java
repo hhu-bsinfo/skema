@@ -7,6 +7,7 @@ import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.SizeUtil;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
+@SuppressWarnings("sunapi")
 final class FullSerializer {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();

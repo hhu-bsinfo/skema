@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.skema.util;
 
+@SuppressWarnings("sunapi")
 public class Constants {
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
     public static final long BYTE_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);

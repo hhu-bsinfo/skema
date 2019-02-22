@@ -6,6 +6,7 @@ import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 /**
  * Utility class for calculating the size of fields within various objects.
  */
+@SuppressWarnings("sunapi")
 public final class SizeUtil {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();

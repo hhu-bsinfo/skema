@@ -10,6 +10,7 @@ import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 /**
  * Utility class for retrieving and creating instances from field specifications.
  */
+@SuppressWarnings("sunapi")
 public final class FieldUtil {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();

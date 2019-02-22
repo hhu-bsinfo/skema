@@ -22,11 +22,8 @@ import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
 import static org.junit.Assert.*;
 
-
 @RunWith(Parameterized.class)
 public class SerializerTest {
-
-    private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
 
     private static final Map<String, Object> INPUT = new HashMap<>();
 

@@ -12,6 +12,7 @@ import de.hhu.bsinfo.skema.util.Constants;
 import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
+@SuppressWarnings("sunapi")
 public class ObjectGenerator {
 
     private static final sun.misc.Unsafe UNSAFE = UnsafeProvider.getUnsafe();
