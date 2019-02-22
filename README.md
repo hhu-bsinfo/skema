@@ -38,6 +38,21 @@ MyObject copy = Skema.deserialize(MyObject.class, buffer);
 
 ```
 
+### Download
+
+```groovy
+repositories {
+    maven {
+        url "https://dl.bintray.com/hhu-bsinfo/dxram"
+    }
+}
+
+dependencies {
+    implementation 'de.hhu.bsinfo:skema:1.0.0'
+}
+
+```
+
 ## Running the tests
 
 Since this project uses the Gradle build system running all included tests is possible using the following command.

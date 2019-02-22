@@ -11,7 +11,7 @@ compileJava {
     targetCompatibility = '1.8'
 }
 
-group = 'de.hhu.bsinfo.skema'
+group = 'de.hhu.bsinfo'
 version = '1.0.0' + (Boolean.valueOf(System.getProperty('release')) ? '' : '-SNAPSHOT')
 
 repositories {
