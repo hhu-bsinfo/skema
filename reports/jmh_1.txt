@@ -1,5 +1,0 @@
-Benchmark                                     Mode  Cnt         Score        Error  Units
-SchemaSerializerBenchmark.deserializeKryo    thrpt   25   6835540,887 ± 178577,572  ops/s
-SchemaSerializerBenchmark.deserializeSchema  thrpt   25  10955297,096 ± 170169,788  ops/s
-SchemaSerializerBenchmark.serializeKryo      thrpt   25   8293510,179 ± 152254,919  ops/s
-SchemaSerializerBenchmark.serializeSchema    thrpt   25  10080610,457 ±  97034,901  ops/s

@@ -250,7 +250,7 @@ public class SkemaBenchmark {
                 .warmupTime(TimeValue.seconds(5))
                 .measurementIterations(5)
                 .measurementTime(TimeValue.seconds(10))
-                .threads(12)
+                .threads(24)
                 .forks(5)
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.SECONDS)
