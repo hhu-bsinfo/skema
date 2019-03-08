@@ -6,7 +6,6 @@ jdk:
   - oraclejdk11
  
 stages:
-- name: test
 - name: snapshot
   if: branch = development AND type = push
 - name: release
@@ -14,8 +13,6 @@ stages:
 
 jobs:
   include:
-  - stage: test
-    script: ./gradlew skema:test
   - stage: snapshot
     script: ./gradlew skema:artifactoryPublish --exclude-task test -Dbintray.user=${BINTRAY_USER} -Dbintray.key=${BINTRAY_KEY} -Dbuild.number=${TRAVIS_BUILD_NUMBER}
   - stage: release
