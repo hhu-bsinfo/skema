@@ -3,6 +3,8 @@ install: true
 
 jdk:
   - oraclejdk8
+  - oraclejdk9
+  - oraclejdk10
   - oraclejdk11
  
 stages:
