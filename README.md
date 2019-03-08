@@ -1,6 +1,6 @@
 # Skema
 
-![java](https://img.shields.io/badge/java-8-green.svg)
+![java](https://img.shields.io/badge/java-8-green.svg) ![java](https://img.shields.io/badge/java-11-green.svg) [![Build Status](https://travis-ci.org/hhu-bsinfo/skema.svg?branch=development)](https://travis-ci.org/hhu-bsinfo/skema)
 
 A fast and simple Java object serialization library based on Ahead-of-Time schema generation.
 
