@@ -2,7 +2,6 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="de.hhu.bsinfo.skema.examples.jmh" target="1.8" />
       <module name="de.hhu.bsinfo.skema.examples.main" target="1.8" />
       <module name="de.hhu.bsinfo.skema.examples.test" target="1.8" />
       <module name="de.hhu.bsinfo.skema.jmh" target="1.8" />

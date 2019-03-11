@@ -1,7 +1,8 @@
 package de.hhu.bsinfo.skema.examples.netty;
 
+import de.hhu.bsinfo.skema.examples.netty.handler.SkemaOutboundHandler;
+import de.hhu.bsinfo.skema.examples.netty.handler.SkemaInboundHandler;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -10,24 +11,18 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.ByteToMessageCodec;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-
 import de.hhu.bsinfo.skema.Skema;
 
 public class Server {
 
     public static void main(String[] p_args) throws InterruptedException {
-        Skema.enableAutoRegistration();
+        Skema.register(RoundTripTime.class);
 
         NioEventLoopGroup boosGroup = new NioEventLoopGroup();
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -42,8 +37,8 @@ public class Server {
             protected void initChannel(SocketChannel p_channel) {
                 ChannelPipeline pipeline = p_channel.pipeline();
                 pipeline.addLast("idleStateHandler", new IdleStateHandler(0,0,5));
-                pipeline.addLast(new RoundTripTime.Encoder());
-                pipeline.addLast(new RoundTripTime.Decoder());
+                pipeline.addLast(new SkemaInboundHandler());
+                pipeline.addLast(new SkemaOutboundHandler());
                 pipeline.addLast(group,"serverHandler", new ServerHandler());
             }
         });
@@ -56,9 +51,7 @@ public class Server {
 
         @Override
         public void channelRead(ChannelHandlerContext p_ctx, Object p_msg) throws Exception {
-            RoundTripTime time = (RoundTripTime) p_msg;
-            time.setReceivedTime(System.nanoTime());
-            System.out.println(time.getElapsedTime());
+            System.out.println(p_msg.toString());
         }
 
         @Override
@@ -66,6 +59,7 @@ public class Server {
             if (p_evt instanceof IdleStateEvent) {
                 IdleStateEvent event = (IdleStateEvent) p_evt;
                 if (event.state() == IdleState.ALL_IDLE) {
+                    System.out.println("ALL IDLE");
                     p_ctx.writeAndFlush(new RoundTripTime(System.nanoTime()));
                 }
             }

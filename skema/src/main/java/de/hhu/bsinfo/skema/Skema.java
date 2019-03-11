@@ -182,6 +182,10 @@ public final class Skema {
         return ClassUtil.allocateInstance(p_class);
     }
 
+    public static <T> T newInstance(final short p_identifier) { return ClassUtil.allocateInstance(SchemaRegistry.resolveClass(p_identifier)); }
+
+    public static short resolveIdentifier(final Class<?> p_class) { return SchemaRegistry.resolveIdentifier(p_class); }
+
     public static Schema register(Class<?> p_class) {
         return SchemaRegistry.register(p_class);
     }

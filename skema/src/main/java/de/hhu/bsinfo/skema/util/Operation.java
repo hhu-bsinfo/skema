@@ -54,6 +54,10 @@ public class Operation {
         m_target = p_result;
     }
 
+    public Object get() {
+        return m_root;
+    }
+
     public byte[] getBuffer() {
         return (byte[]) m_root;
     }
@@ -116,7 +120,7 @@ public class Operation {
     }
 
     public void reset() {
-        reset(null, 0);
+        reset(null);
     }
 
     public int getFieldProcessed() {
@@ -127,7 +131,7 @@ public class Operation {
         m_fieldProcessed = p_fieldProcessed;
     }
 
-    public void reset(final Object p_target, final int p_expectedBytes) {
+    public void reset(final Object p_target) {
         m_root = p_target;
         m_bytesProcessed = 0;
     }

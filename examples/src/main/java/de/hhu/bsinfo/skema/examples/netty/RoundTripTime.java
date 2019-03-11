@@ -43,23 +43,8 @@ public class RoundTripTime {
         return m_receivedTime - m_sendTime;
     }
 
-    public static final class Encoder extends MessageToByteEncoder<RoundTripTime> {
-        @Override
-        protected void encode(ChannelHandlerContext p_ctx, RoundTripTime p_msg, ByteBuf p_out) throws Exception {
-            p_out.writeBytes(Skema.serialize(p_msg));
-        }
-    }
-
-    public static final class Decoder extends ByteToMessageDecoder {
-        @Override
-        protected void decode(ChannelHandlerContext p_ctx, ByteBuf p_in, List<Object> p_out) throws Exception {
-            if (p_in.readableBytes() < 2 * Long.BYTES) {
-                return;
-            }
-
-            byte[] bytes = new byte[2 * Long.BYTES];
-            p_in.readBytes(bytes);
-            p_out.add(Skema.deserialize(RoundTripTime.class, bytes));
-        }
+    @Override
+    public String toString() {
+        return String.format("[%d | %d]", m_sendTime, m_receivedTime);
     }
 }

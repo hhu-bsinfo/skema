@@ -1,5 +1,7 @@
 package de.hhu.bsinfo.skema.examples.netty;
 
+import de.hhu.bsinfo.skema.examples.netty.handler.SkemaOutboundHandler;
+import de.hhu.bsinfo.skema.examples.netty.handler.SkemaInboundHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -13,7 +15,7 @@ import de.hhu.bsinfo.skema.Skema;
 public class Client {
 
     public static void main(String[] p_args) {
-        Skema.enableAutoRegistration();
+        Skema.register(RoundTripTime.class);
 
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
@@ -23,7 +25,10 @@ public class Client {
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel p_channel) {
-                p_channel.pipeline().addLast(new RoundTripTime.Encoder(), new RoundTripTime.Decoder(), new ClientHandler());
+                p_channel.pipeline().addLast(
+                        new SkemaInboundHandler(),
+                        new ClientHandler(),
+                        new SkemaOutboundHandler());
             }
         });
 
@@ -34,9 +39,9 @@ public class Client {
     public static final class ClientHandler extends ChannelInboundHandlerAdapter {
 
         @Override
-        public void channelRead(ChannelHandlerContext p_ctx, Object p_msg) throws Exception {
-            RoundTripTime time = (RoundTripTime) p_msg;
-            p_ctx.writeAndFlush(time);
+        public void channelRead(ChannelHandlerContext p_ctx, Object p_msg) {
+            System.out.println("channelRead");
+            p_ctx.writeAndFlush(p_msg);
         }
 
         @Override

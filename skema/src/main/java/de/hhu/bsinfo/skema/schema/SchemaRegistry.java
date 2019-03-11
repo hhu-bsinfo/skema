@@ -10,12 +10,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class SchemaRegistry {
 
     private static final Map<Class<?>, Schema> SCHEMAS = new HashMap<>();
 
     private static boolean m_isAutoRegistrationEnabled = false;
+
+    private static final Class<?>[] CLASS_MAP = new Class[Short.MAX_VALUE];
+
+    private static final Map<Class<?>, Short> ID_MAP = new HashMap<>();
+
+    private static final AtomicInteger ID_COUNTER = new AtomicInteger(1);
 
     static {
         register(
@@ -39,13 +46,17 @@ public final class SchemaRegistry {
 
     public static synchronized Schema register(Class<?> p_class) {
         Schema schema = SchemaGenerator.generate(p_class);
-        SCHEMAS.put(p_class, schema);
+        register(schema);
         return schema;
     }
 
     private static synchronized void register(Schema... p_schema) {
+        short identifier;
         for (Schema schema : p_schema) {
             SCHEMAS.put(schema.getTarget(), schema);
+            identifier = (short) ID_COUNTER.getAndIncrement();
+            CLASS_MAP[identifier] = schema.getTarget();
+            ID_MAP.put(schema.getTarget(), identifier);
         }
     }
 
@@ -57,8 +68,12 @@ public final class SchemaRegistry {
         m_isAutoRegistrationEnabled = false;
     }
 
-    private static synchronized void register(Class<?> p_class, Schema p_schema) {
-        SCHEMAS.put(p_class, p_schema);
+    public static <T> Class<T> resolveClass(final short p_identifier) {
+        return (Class<T>)CLASS_MAP[p_identifier];
+    }
+
+    public static short resolveIdentifier(final Class<?> p_class) {
+        return ID_MAP.get(p_class);
     }
 
     private SchemaRegistry() {}
