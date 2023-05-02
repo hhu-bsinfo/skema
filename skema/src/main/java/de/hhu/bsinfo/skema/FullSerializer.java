@@ -14,9 +14,9 @@ final class FullSerializer {
 
     private FullSerializer() {}
 
-    static int serialize(final Object p_object, final byte[] p_buffer, final int p_offset) {
-        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
-        int position = p_offset;
+    static int serialize(final Object instance, final byte[] buffer, final int offset) {
+        Schema schema = SchemaRegistry.getSchema(instance.getClass());
+        int position = offset;
         int arraySize = 0;
         int arrayLength = 0;
         int i, j;
@@ -29,48 +29,48 @@ final class FullSerializer {
             switch (fieldSpec.getFieldType()) {
 
                 case BYTE:
-                    UNSAFE.putByte(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putByte(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getByte(instance, fieldSpec.getOffset()));
                     position += Byte.BYTES;
                     break;
 
                 case CHAR:
-                    UNSAFE.putChar(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getChar(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putChar(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getChar(instance, fieldSpec.getOffset()));
                     position += Character.BYTES;
                     break;
 
                 case SHORT:
-                    UNSAFE.putShort(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getShort(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putShort(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getShort(instance, fieldSpec.getOffset()));
                     position += Short.BYTES;
                     break;
 
                 case INT:
-                    UNSAFE.putInt(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putInt(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(instance, fieldSpec.getOffset()));
                     position += Integer.BYTES;
                     break;
 
                 case LONG:
-                    UNSAFE.putLong(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getLong(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putLong(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getLong(instance, fieldSpec.getOffset()));
                     position += Long.BYTES;
                     break;
 
                 case FLOAT:
-                    UNSAFE.putFloat(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getFloat(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putFloat(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getFloat(instance, fieldSpec.getOffset()));
                     position += Float.BYTES;
                     break;
 
                 case DOUBLE:
-                    UNSAFE.putDouble(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getDouble(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putDouble(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getDouble(instance, fieldSpec.getOffset()));
                     position += Double.BYTES;
                     break;
 
                 case BOOLEAN:
-                    UNSAFE.putByte(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getBoolean(p_object, fieldSpec.getOffset()) ? Constants.TRUE : Constants.FALSE);
+                    UNSAFE.putByte(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getBoolean(instance, fieldSpec.getOffset()) ? Constants.TRUE : Constants.FALSE);
                     position += Byte.BYTES;
                     break;
 
                 case LENGTH:
-                    object = FieldUtil.getObject(p_object, fieldSpec);
-                    UNSAFE.putInt(p_buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(object, SizeUtil.ARRAY_LENGTH_OFFSET));
+                    object = FieldUtil.getObject(instance, fieldSpec);
+                    UNSAFE.putInt(buffer, Constants.BYTE_ARRAY_OFFSET + position, UNSAFE.getInt(object, SizeUtil.ARRAY_LENGTH_OFFSET));
                     position += Integer.BYTES;
                     arrayLength = SizeUtil.getArrayLength(object);
                     break;
@@ -84,49 +84,49 @@ final class FullSerializer {
 
                 case BYTE_ARRAY:
                     arraySize = arrayLength * Byte.BYTES;
-                    UNSAFE.copyMemory(object, Constants.BYTE_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.BYTE_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
                 case CHAR_ARRAY:
                     arraySize = arrayLength * Character.BYTES;
-                    UNSAFE.copyMemory(object, Constants.CHAR_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.CHAR_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
                 case SHORT_ARRAY:
                     arraySize = arrayLength * Short.BYTES;
-                    UNSAFE.copyMemory(object, Constants.SHORT_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.SHORT_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
                 case INT_ARRAY:
                     arraySize = arrayLength * Integer.BYTES;
-                    UNSAFE.copyMemory(object, Constants.INT_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.INT_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
                 case LONG_ARRAY:
                     arraySize = arrayLength * Long.BYTES;
-                    UNSAFE.copyMemory(object, Constants.LONG_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.LONG_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
                 case FLOAT_ARRAY:
                     arraySize = arrayLength * Float.BYTES;
-                    UNSAFE.copyMemory(object, Constants.FLOAT_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.FLOAT_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
                 case DOUBLE_ARRAY:
                     arraySize = arrayLength * Double.BYTES;
-                    UNSAFE.copyMemory(object, Constants.DOUBLE_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.DOUBLE_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
                 case BOOLEAN_ARRAY:
                     arraySize = arrayLength * Byte.BYTES;
-                    UNSAFE.copyMemory(object, Constants.BOOLEAN_ARRAY_OFFSET, p_buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
+                    UNSAFE.copyMemory(object, Constants.BOOLEAN_ARRAY_OFFSET, buffer, Constants.BYTE_ARRAY_OFFSET + position, arraySize);
                     position += arraySize;
                     break;
 
@@ -136,25 +136,25 @@ final class FullSerializer {
 
                 case ENUM:
                 case OBJECT:
-                    object = FieldUtil.getObject(p_object, fieldSpec);
-                    position += serialize(object, p_buffer, position);
+                    object = FieldUtil.getObject(instance, fieldSpec);
+                    position += serialize(object, buffer, position);
                     break;
 
                 case OBJECT_ARRAY:
-                    array = FieldUtil.getArray(p_object, fieldSpec);
+                    array = FieldUtil.getArray(instance, fieldSpec);
                     for (j = 0; j < array.length; j++) {
-                        position += serialize(array[j], p_buffer, position);
+                        position += serialize(array[j], buffer, position);
                     }
                     break;
             }
         }
 
-        return position - p_offset;
+        return position - offset;
     }
 
-    static int serialize(final Object p_object, final long p_address) {
-        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
-        long position = p_address;
+    static int serialize(final Object instance, final long address) {
+        Schema schema = SchemaRegistry.getSchema(instance.getClass());
+        long position = address;
         int arraySize = 0;
         int arrayLength = 0;
         int i, j;
@@ -167,47 +167,47 @@ final class FullSerializer {
             switch (fieldSpec.getFieldType()) {
 
                 case BYTE:
-                    UNSAFE.putByte(position, UNSAFE.getByte(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putByte(position, UNSAFE.getByte(instance, fieldSpec.getOffset()));
                     position += Byte.BYTES;
                     break;
 
                 case CHAR:
-                    UNSAFE.putChar(position, UNSAFE.getChar(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putChar(position, UNSAFE.getChar(instance, fieldSpec.getOffset()));
                     position += Character.BYTES;
                     break;
 
                 case SHORT:
-                    UNSAFE.putShort(position, UNSAFE.getShort(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putShort(position, UNSAFE.getShort(instance, fieldSpec.getOffset()));
                     position += Short.BYTES;
                     break;
 
                 case INT:
-                    UNSAFE.putInt(position, UNSAFE.getInt(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putInt(position, UNSAFE.getInt(instance, fieldSpec.getOffset()));
                     position += Integer.BYTES;
                     break;
 
                 case LONG:
-                    UNSAFE.putLong(position, UNSAFE.getLong(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putLong(position, UNSAFE.getLong(instance, fieldSpec.getOffset()));
                     position += Long.BYTES;
                     break;
 
                 case FLOAT:
-                    UNSAFE.putFloat(position, UNSAFE.getFloat(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putFloat(position, UNSAFE.getFloat(instance, fieldSpec.getOffset()));
                     position += Float.BYTES;
                     break;
 
                 case DOUBLE:
-                    UNSAFE.putDouble(position, UNSAFE.getDouble(p_object, fieldSpec.getOffset()));
+                    UNSAFE.putDouble(position, UNSAFE.getDouble(instance, fieldSpec.getOffset()));
                     position += Double.BYTES;
                     break;
 
                 case BOOLEAN:
-                    UNSAFE.putByte(position, UNSAFE.getBoolean(p_object, fieldSpec.getOffset()) ? Constants.TRUE : Constants.FALSE);
+                    UNSAFE.putByte(position, UNSAFE.getBoolean(instance, fieldSpec.getOffset()) ? Constants.TRUE : Constants.FALSE);
                     position += Byte.BYTES;
                     break;
 
                 case LENGTH:
-                    object = FieldUtil.getObject(p_object, fieldSpec);
+                    object = FieldUtil.getObject(instance, fieldSpec);
                     UNSAFE.putInt(position, UNSAFE.getInt(object, SizeUtil.ARRAY_LENGTH_OFFSET));
                     position += Integer.BYTES;
                     arrayLength = SizeUtil.getArrayLength(object);
@@ -274,12 +274,12 @@ final class FullSerializer {
 
                 case ENUM:
                 case OBJECT:
-                    object = FieldUtil.getObject(p_object, fieldSpec);
+                    object = FieldUtil.getObject(instance, fieldSpec);
                     position += serialize(object, position);
                     break;
 
                 case OBJECT_ARRAY:
-                    array = FieldUtil.getArray(p_object, fieldSpec);
+                    array = FieldUtil.getArray(instance, fieldSpec);
                     for (j = 0; j < array.length; j++) {
                         position += serialize(array[j], position);
                     }
@@ -287,7 +287,7 @@ final class FullSerializer {
             }
         }
 
-        return (int) (position - p_address);
+        return (int) (position - address);
     }
 
 

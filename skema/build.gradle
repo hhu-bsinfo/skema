@@ -1,56 +1,34 @@
 plugins {
-    id 'me.champeau.gradle.jmh' version '0.4.8'
+    // IDE plugins
+    id 'idea'
+    id 'eclipse'
+
+    // Gradle java-library plugin
     id 'java-library'
-    id 'maven-publish'
-    id 'com.jfrog.bintray' version '1.8.4'
-    id "com.jfrog.artifactory" version '4.7.5'
 }
 
-compileJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(20)
+    }
 }
 
 group = 'de.hhu.bsinfo'
 version = '1.0.0' + (Boolean.valueOf(System.getProperty('release')) ? '' : '-SNAPSHOT')
 
-repositories {
-    mavenCentral()
-
-    maven {
-        url "https://dl.bintray.com/hhu-bsinfo/dxram"
-    }
-
-    maven {
-        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
-    }
-}
-
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+tasks.withType(JavaExec) {
+    jvmArgs += ['--add-opens', 'java.base/java.lang=ALL-UNNAMED']
 }
 
-javadoc.failOnError = false
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-task benchmarkJar(type: Jar, dependsOn: jmhJar) {
-    manifest {
-        attributes 'Main-Class': 'org.openjdk.jmh.Main'
-    }
-    classifier = 'benchmark'
-    from {
-        (jmhJar.outputs.files + configurations.jmh + configurations.jmhRuntime)
-                .collect { it.isDirectory() ? it : zipTree(it) }
-    }
+test {
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.math=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.time=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util=ALL-UNNAMED'
 }
 
 dependencies {
@@ -58,15 +36,4 @@ dependencies {
 
     testImplementation 'org.hamcrest:hamcrest-core:2.1'
     testImplementation 'junit:junit:4.12'
-
-    jmh 'com.esotericsoftware:kryo:4.0.2'
 }
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-apply from: 'publish.gradle'
-apply from: 'bintray.gradle'
-apply from: 'artifactory.gradle'

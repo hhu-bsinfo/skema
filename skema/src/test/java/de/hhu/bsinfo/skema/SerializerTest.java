@@ -14,11 +14,9 @@ import org.junit.runners.Parameterized;
 import de.hhu.bsinfo.skema.data.BoxedCollection;
 import de.hhu.bsinfo.skema.data.PrimitiveCollection;
 import de.hhu.bsinfo.skema.data.Result;
-import de.hhu.bsinfo.skema.data.Status;
 import de.hhu.bsinfo.skema.data.TextMessage;
 import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.Operation;
-import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
 import static org.junit.Assert.*;
 
@@ -35,13 +33,13 @@ public class SerializerTest {
     }
 
     @Parameterized.Parameter
-    public Object m_key;
+    public Object key;
 
-    private Object m_expected;
+    private Object expected;
 
     @Before
     public void initializeTestObject() {
-        m_expected = INPUT.get(m_key);
+        expected = INPUT.get(key);
     }
 
     @BeforeClass
@@ -56,51 +54,51 @@ public class SerializerTest {
 
     @Test
     public void testFullOnHeap() {
-        byte[] bytes = Skema.serialize(m_expected);
-        Object object = Skema.deserialize(m_expected.getClass(), bytes);
-        assertEquals(m_expected, object);
+        byte[] bytes = Skema.serialize(expected);
+        Object object = Skema.deserialize(expected.getClass(), bytes);
+        assertEquals(expected, object);
     }
 
     @Test
     public void testFullOffHeap() {
-        int size = Skema.sizeOf(m_expected);
+        int size = Skema.sizeOf(expected);
         long address = Skema.allocate(size);
-        Skema.serialize(m_expected, address);
-        Object object = Skema.deserialize(m_expected.getClass(), address);
+        Skema.serialize(expected, address);
+        Object object = Skema.deserialize(expected.getClass(), address);
         Skema.free(address);
-        assertEquals(m_expected, object);
+        assertEquals(expected, object);
     }
 
     @Test
     public void testPartialOnHeap() {
-        int size = Skema.sizeOf(m_expected);
+        int size = Skema.sizeOf(expected);
         byte[] buffer = new byte[size];
 
-        Operation serializerOperation = new Operation(m_expected);
+        Operation serializerOperation = new Operation(expected);
         for (int i = 0; i < buffer.length; i++) {
             Skema.serialize(serializerOperation, buffer, i, 1);
         }
 
-        Object actual = Skema.newInstance(m_expected.getClass());
+        Object actual = Skema.newInstance(expected.getClass());
         Operation deserializerOperation = new Operation(actual);
         for (int i = 0; i < buffer.length; i++) {
             Skema.deserialize(deserializerOperation, buffer, i, 1);
         }
 
-        assertEquals(m_expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
     public void testPartialOffHeap() {
-        int size = Skema.sizeOf(m_expected);
+        int size = Skema.sizeOf(expected);
         long address = Skema.allocate(size);
 
-        Operation serializerOperation = new Operation(m_expected);
+        Operation serializerOperation = new Operation(expected);
         for (int i = 0; i < size; i++) {
             Skema.serialize(serializerOperation, address + i, 1);
         }
 
-        Object actual = Skema.newInstance(m_expected.getClass());
+        Object actual = Skema.newInstance(expected.getClass());
         Operation deserializerOperation = new Operation(actual);
         for (int i = 0; i < size; i++) {
             Skema.deserialize(deserializerOperation, address + i, 1);
@@ -108,7 +106,7 @@ public class SerializerTest {
 
         Skema.free(address);
 
-        assertEquals(m_expected, actual);
+        assertEquals(expected, actual);
     }
 
 }

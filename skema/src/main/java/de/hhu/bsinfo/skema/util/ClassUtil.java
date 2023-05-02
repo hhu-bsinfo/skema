@@ -10,16 +10,16 @@ public class ClassUtil {
 
     private static final Map<String, Class> CLASS_CACHE = new HashMap<>();
 
-    public static <T> T allocateInstance(Class<T> p_class) {
+    public static <T> T allocateInstance(Class<T> clazz) {
         try {
-            return (T) UNSAFE.allocateInstance(p_class);
+            return (T) UNSAFE.allocateInstance(clazz);
         } catch (InstantiationException e) {
             return null;
         }
     }
 
-    public static <T> T allocateInstance(String p_class) {
-        Class cachedClass = CLASS_CACHE.get(p_class);
+    public static <T> T allocateInstance(String clazz) {
+        Class cachedClass = CLASS_CACHE.get(clazz);
         if (cachedClass != null) {
             try {
                 return (T) UNSAFE.allocateInstance(cachedClass);
@@ -29,12 +29,12 @@ public class ClassUtil {
         }
 
         try {
-            cachedClass = Class.forName(p_class);
+            cachedClass = Class.forName(clazz);
         } catch (ClassNotFoundException ignored) {
             return null;
         }
 
-        CLASS_CACHE.put(p_class, cachedClass);
+        CLASS_CACHE.put(clazz, cachedClass);
 
         try {
             return (T) UNSAFE.allocateInstance(cachedClass);

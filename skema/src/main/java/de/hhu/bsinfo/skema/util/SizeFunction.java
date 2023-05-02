@@ -7,5 +7,5 @@ import de.hhu.bsinfo.skema.schema.Schema;
  */
 @FunctionalInterface
 interface SizeFunction {
-    int sizeOf(final Object p_object, final Schema.FieldSpec p_fieldSpec);
+    int sizeOf(final Object instance, final Schema.FieldSpec fieldSpec);
 }

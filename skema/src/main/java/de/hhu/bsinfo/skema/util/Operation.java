@@ -12,7 +12,7 @@ public class Operation {
     static {
         try {
             sun.misc.Unsafe unsafe = UnsafeProvider.getUnsafe();
-            Field field = Operation.class.getDeclaredField("m_tmpValue");
+            Field field = Operation.class.getDeclaredField("tmpValue");
             long offset = unsafe.objectFieldOffset(field);
             TMP_VALUE_FIELD = new Schema.FieldSpec(
                     FieldType.INT,
@@ -29,94 +29,94 @@ public class Operation {
         NONE, INTERRUPTED
     }
 
-    private Status m_status = Status.NONE;
+    private Status status = Status.NONE;
 
-    private Object m_root;
-    private Object m_target;
-    private Object m_parent;
+    private Object root;
+    private Object target;
+    private Object parent;
 
-    private Schema m_schema;
-    private Schema.FieldSpec m_fieldSpec;
-    private Schema.FieldSpec m_parentFieldSpec;
+    private Schema schema;
+    private Schema.FieldSpec fieldSpec;
+    private Schema.FieldSpec parentFieldSpec;
 
-    private int m_bytesProcessed = 0;
-    private int m_fieldProcessed = 0;
-    private int m_fieldLeft = 0;
+    private int bytesProcessed = 0;
+    private int fieldProcessed = 0;
+    private int fieldLeft = 0;
 
-    private final int[] m_indexStack = new int[128];
-    private int m_stackPosition = 0;
+    private final int[] indexStack = new int[128];
+    private int stackPosition = 0;
 
-    private int m_tmpValue = 0;
-    private int m_objectArrayIndex = 0;
+    private int tmpValue = 0;
+    private int objectArrayIndex = 0;
 
-    public Operation(Object p_result) {
-        m_root = p_result;
-        m_target = p_result;
+    public Operation(Object result) {
+        root = result;
+        target = result;
     }
 
     public Object get() {
-        return m_root;
+        return root;
     }
 
     public byte[] getBuffer() {
-        return (byte[]) m_root;
+        return (byte[]) root;
     }
 
     public int getBytesProcessed() {
-        return m_bytesProcessed;
+        return bytesProcessed;
     }
 
-    public void setRoot(Object p_root) {
-        m_root = p_root;
+    public void setRoot(Object root) {
+        this.root = root;
     }
 
     public Object getTarget() {
-        return m_target;
+        return target;
     }
 
-    public void setTarget(Object p_target) {
-        m_target = p_target;
+    public void setTarget(Object target) {
+        this.target = target;
     }
 
-    public void setBytesProcessed(int p_bytesProcessed) {
-        m_bytesProcessed = p_bytesProcessed;
+    public void setBytesProcessed(int bytesProcessed) {
+        this.bytesProcessed = bytesProcessed;
     }
 
-    public void addCurrentBytes(int p_bytesProcessed) {
-        m_bytesProcessed += p_bytesProcessed;
+    public void addCurrentBytes(int bytesProcessed) {
+        this.bytesProcessed += bytesProcessed;
     }
 
     public Object getParent() {
-        return m_parent;
+        return parent;
     }
 
-    public void setParent(final Object p_parent) {
-        m_parent = p_parent;
+    public void setParent(final Object parent) {
+        this.parent = parent;
     }
 
-    public void setParent(final Object p_parent, final Schema.FieldSpec p_fieldSpec) {
-        m_parent = p_parent;
-        m_parentFieldSpec = p_fieldSpec;
+    public void setParent(final Object parent, final Schema.FieldSpec fieldSpec) {
+        this.parent = parent;
+        parentFieldSpec = fieldSpec;
     }
 
     public Status getStatus() {
-        return m_status;
+        return status;
     }
 
     public void setStatus(final Status p_status) {
-        m_status = p_status;
+        status = p_status;
     }
 
     public void pushIndex(final int p_index) {
-        m_indexStack[m_stackPosition++] = p_index;
+        indexStack[stackPosition++] = p_index;
     }
 
     public int popIndex() {
-        return m_stackPosition != 0 ? m_indexStack[--m_stackPosition] : 0;
+        return stackPosition != 0 ? indexStack[--stackPosition] : 0;
     }
 
     public boolean hasStarted() {
-        return m_bytesProcessed != 0;
+        return bytesProcessed != 0;
     }
 
     public void reset() {
@@ -124,84 +124,92 @@ public class Operation {
     }
 
     public int getFieldProcessed() {
-        return m_fieldProcessed;
+        return fieldProcessed;
     }
 
     public void setFieldProcessed(int p_fieldProcessed) {
-        m_fieldProcessed = p_fieldProcessed;
+        fieldProcessed = p_fieldProcessed;
     }
 
     public void reset(final Object p_target) {
-        m_root = p_target;
-        m_bytesProcessed = 0;
+        root = p_target;
+        bytesProcessed = 0;
+        fieldProcessed = 0;
+        fieldLeft = 0;
+        stackPosition = 0;
+        tmpValue = 0;
+        objectArrayIndex = 0;
+        schema = null;
+        fieldSpec = null;
+        parentFieldSpec = null;
     }
 
     public void rewind() {
-        m_target = m_root;
-        m_bytesProcessed = 0;
-        m_fieldProcessed = 0;
-        m_fieldLeft = 0;
-        m_stackPosition = 0;
-        m_tmpValue = 0;
-        m_objectArrayIndex = 0;
-        m_schema = null;
-        m_fieldSpec = null;
-        m_parentFieldSpec = null;
+        target = root;
+        bytesProcessed = 0;
+        fieldProcessed = 0;
+        fieldLeft = 0;
+        stackPosition = 0;
+        tmpValue = 0;
+        objectArrayIndex = 0;
+        schema = null;
+        fieldSpec = null;
+        parentFieldSpec = null;
     }
 
     public int getFieldLeft() {
-        return m_fieldLeft;
+        return fieldLeft;
     }
 
     public void setFieldLeft(int p_fieldLeft) {
-        m_fieldLeft = p_fieldLeft;
+        fieldLeft = p_fieldLeft;
     }
 
     public int getTmpValue() {
-        return m_tmpValue;
+        return tmpValue;
     }
 
     public void setTmpValue(int p_tmpValue) {
-        m_tmpValue = p_tmpValue;
+        tmpValue = p_tmpValue;
     }
 
     public Object getRoot() {
-        return m_root;
+        return root;
     }
 
     public Schema getSchema() {
-        return m_schema;
+        return schema;
     }
 
     public void setSchema(Schema p_schema) {
-        m_schema = p_schema;
+        schema = p_schema;
     }
 
     public Schema.FieldSpec getFieldSpec() {
-        return m_fieldSpec;
+        return fieldSpec;
     }
 
     public void setFieldSpec(Schema.FieldSpec p_fieldSpec) {
-        m_fieldSpec = p_fieldSpec;
+        fieldSpec = p_fieldSpec;
     }
 
     public int getObjectArrayIndex() {
-        return m_objectArrayIndex;
+        return objectArrayIndex;
     }
 
     public void setObjectArrayIndex(int p_objectArrayIndex) {
-        m_objectArrayIndex = p_objectArrayIndex;
+        objectArrayIndex = p_objectArrayIndex;
     }
 
     public Schema.FieldSpec getParentFieldSpec() {
-        return m_parentFieldSpec;
+        return parentFieldSpec;
     }
 
     public void setParentFieldSpec(Schema.FieldSpec p_parentFieldSpec) {
-        m_parentFieldSpec = p_parentFieldSpec;
+        parentFieldSpec = p_parentFieldSpec;
     }
 
     public boolean isInterrupted() {
-        return m_status == Status.INTERRUPTED;
+        return status == Status.INTERRUPTED;
     }
 }

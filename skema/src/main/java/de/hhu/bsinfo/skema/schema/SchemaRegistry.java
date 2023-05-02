@@ -16,7 +16,7 @@ public final class SchemaRegistry {
 
     private static final Map<Class<?>, Schema> SCHEMAS = new HashMap<>();
 
-    private static boolean m_isAutoRegistrationEnabled = false;
+    private static boolean isAutoRegistrationEnabled = false;
 
     private static final Class<?>[] CLASS_MAP = new Class[Short.MAX_VALUE];
 
@@ -44,15 +44,15 @@ public final class SchemaRegistry {
         );
     }
 
-    public static synchronized Schema register(Class<?> p_class) {
-        Schema schema = SchemaGenerator.generate(p_class);
+    public static synchronized Schema register(Class<?> clazz) {
+        Schema schema = SchemaGenerator.generate(clazz);
         register(schema);
         return schema;
     }
 
-    private static synchronized void register(Schema... p_schema) {
+    private static synchronized void register(Schema... schemas) {
         short identifier;
-        for (Schema schema : p_schema) {
+        for (Schema schema : schemas) {
             SCHEMAS.put(schema.getTarget(), schema);
             identifier = (short) ID_COUNTER.getAndIncrement();
             CLASS_MAP[identifier] = schema.getTarget();
@@ -61,37 +61,37 @@ public final class SchemaRegistry {
     }
 
     public static void enableAutoRegistration() {
-        m_isAutoRegistrationEnabled = true;
+        isAutoRegistrationEnabled = true;
     }
 
     public static void disableAutoRegistration() {
-        m_isAutoRegistrationEnabled = false;
+        isAutoRegistrationEnabled = false;
     }
 
-    public static <T> Class<T> resolveClass(final short p_identifier) {
-        return (Class<T>)CLASS_MAP[p_identifier];
+    public static <T> Class<T> resolveClass(final short identifier) {
+        return (Class<T>)CLASS_MAP[identifier];
     }
 
-    public static short resolveIdentifier(final Class<?> p_class) {
-        return ID_MAP.get(p_class);
+    public static short resolveIdentifier(final Class<?> clazz) {
+        return ID_MAP.get(clazz);
     }
 
     private SchemaRegistry() {}
 
-    public static Schema getSchema(Class<?> p_class) {
-        Schema schema = SCHEMAS.get(p_class);
+    public static Schema getSchema(Class<?> clazz) {
+        Schema schema = SCHEMAS.get(clazz);
 
         if (schema != null) {
             return schema;
         }
 
-        if (m_isAutoRegistrationEnabled) {
-            schema = register(p_class);
+        if (isAutoRegistrationEnabled) {
+            schema = register(clazz);
         }
 
         if (schema == null) {
             throw new IllegalArgumentException(String.format("No schema for class %s was registered",
-                    p_class.getCanonicalName()));
+                    clazz.getCanonicalName()));
         }
 
         return schema;

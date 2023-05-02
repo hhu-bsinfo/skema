@@ -1,10 +1,8 @@
 package de.hhu.bsinfo.skema.random;
 
-import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import de.hhu.bsinfo.skema.Skema;
 import de.hhu.bsinfo.skema.schema.Schema;
 import de.hhu.bsinfo.skema.schema.SchemaRegistry;
 import de.hhu.bsinfo.skema.util.ClassUtil;
@@ -19,35 +17,35 @@ public class ObjectGenerator {
 
     private static final Config DEFAULT_CONFIG = new Config(4, 32);
 
-    public static <T> T newInstance(final Class<T> p_class) {
-        return newInstance(p_class, DEFAULT_CONFIG, ThreadLocalRandom.current());
+    public static <T> T newInstance(final Class<T> clazz) {
+        return newInstance(clazz, DEFAULT_CONFIG, ThreadLocalRandom.current());
     }
 
-    public static <T> T newInstance(final Class<T> p_class, final Config p_config) {
-        return newInstance(p_class, p_config, ThreadLocalRandom.current());
+    public static <T> T newInstance(final Class<T> clazz, final Config config) {
+        return newInstance(clazz, config, ThreadLocalRandom.current());
     }
 
-    public static <T> T newInstance(final Class<T> p_class, final Random p_random) {
-        return newInstance(p_class, DEFAULT_CONFIG, p_random);
+    public static <T> T newInstance(final Class<T> clazz, final Random random) {
+        return newInstance(clazz, DEFAULT_CONFIG, random);
     }
 
-    public static <T> T newInstance(final Class<T> p_class, final Config p_config, final Random p_random) {
+    public static <T> T newInstance(final Class<T> clazz, final Config config, final Random random) {
 
-        if (p_class.isEnum()) {
-            return (T) FieldUtil.randomEnum(p_class, p_random);
+        if (clazz.isEnum()) {
+            return (T) FieldUtil.randomEnum(clazz, random);
         }
 
-        T object = ClassUtil.allocateInstance(p_class);
+        T object = ClassUtil.allocateInstance(clazz);
         if (object == null) {
             return null;
         }
 
-        randomize(object, p_config, p_random);
+        randomize(object, config, random);
         return object;
     }
 
-    static void randomize(final Object p_object, final Config p_config, final Random p_random) {
-        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
+    static void randomize(final Object instance, final Config config, final Random random) {
+        Schema schema = SchemaRegistry.getSchema(instance.getClass());
         int arrayLength = 0;
         int i;
         int j;
@@ -60,35 +58,35 @@ public class ObjectGenerator {
             switch (fieldSpec.getFieldType()) {
 
                 case BYTE:
-                    UNSAFE.putByte(p_object, fieldSpec.getOffset(), (byte) (p_random.nextInt(Byte.MAX_VALUE) * (p_random.nextBoolean() ? 1 : -1)));
+                    UNSAFE.putByte(instance, fieldSpec.getOffset(), (byte) (random.nextInt(Byte.MAX_VALUE) * (random.nextBoolean() ? 1 : -1)));
                     break;
 
                 case CHAR:
-                    UNSAFE.putChar(p_object, fieldSpec.getOffset(), (char) (p_random.nextInt(Character.MAX_VALUE) * (p_random.nextBoolean() ? 1 : -1)));
+                    UNSAFE.putChar(instance, fieldSpec.getOffset(), (char) (random.nextInt(Character.MAX_VALUE) * (random.nextBoolean() ? 1 : -1)));
                     break;
 
                 case SHORT:
-                    UNSAFE.putShort(p_object, fieldSpec.getOffset(), (short) (p_random.nextInt(Short.MAX_VALUE) * (p_random.nextBoolean() ? 1 : -1)));
+                    UNSAFE.putShort(instance, fieldSpec.getOffset(), (short) (random.nextInt(Short.MAX_VALUE) * (random.nextBoolean() ? 1 : -1)));
                     break;
 
                 case INT:
-                    UNSAFE.putInt(p_object, fieldSpec.getOffset(), p_random.nextInt());
+                    UNSAFE.putInt(instance, fieldSpec.getOffset(), random.nextInt());
                     break;
 
                 case LONG:
-                    UNSAFE.putLong(p_object, fieldSpec.getOffset(), p_random.nextLong());
+                    UNSAFE.putLong(instance, fieldSpec.getOffset(), random.nextLong());
                     break;
 
                 case FLOAT:
-                    UNSAFE.putFloat(p_object, fieldSpec.getOffset(), p_random.nextFloat());
+                    UNSAFE.putFloat(instance, fieldSpec.getOffset(), random.nextFloat());
                     break;
 
                 case DOUBLE:
-                    UNSAFE.putDouble(p_object, fieldSpec.getOffset(), p_random.nextDouble());
+                    UNSAFE.putDouble(instance, fieldSpec.getOffset(), random.nextDouble());
                     break;
 
                 case BOOLEAN:
-                    UNSAFE.putBoolean(p_object, fieldSpec.getOffset(), p_random.nextBoolean());
+                    UNSAFE.putBoolean(instance, fieldSpec.getOffset(), random.nextBoolean());
                     break;
 
                 case BYTE_ARRAY:
@@ -99,31 +97,31 @@ public class ObjectGenerator {
                 case FLOAT_ARRAY:
                 case DOUBLE_ARRAY:
                 case BOOLEAN_ARRAY:
-                    arrayLength = p_random.nextInt(p_config.getMaxArrayLength() - p_config.getMinArrayLength() + 1) + p_config.getMinArrayLength();
-                    object = FieldUtil.randomArray(fieldSpec, arrayLength, p_random);
-                    UNSAFE.putObject(p_object, fieldSpec.getOffset(), object);
+                    arrayLength = random.nextInt(config.getMaxArrayLength() - config.getMinArrayLength() + 1) + config.getMinArrayLength();
+                    object = FieldUtil.randomArray(fieldSpec, arrayLength, random);
+                    UNSAFE.putObject(instance, fieldSpec.getOffset(), object);
                     break;
 
                 case ENUM:
-                    object = FieldUtil.randomEnum(fieldSpec, p_random);
-                    UNSAFE.putObject(p_object, fieldSpec.getOffset(), object);
+                    object = FieldUtil.randomEnum(fieldSpec, random);
+                    UNSAFE.putObject(instance, fieldSpec.getOffset(), object);
                     break;
 
                 case OBJECT:
                     object = FieldUtil.allocateInstance(fieldSpec);
-                    randomize(object, p_config, p_random);
-                    UNSAFE.putObject(p_object, fieldSpec.getOffset(), object);
+                    randomize(object, config, random);
+                    UNSAFE.putObject(instance, fieldSpec.getOffset(), object);
                     break;
 
                 case OBJECT_ARRAY:
-                    arrayLength = p_random.nextInt(p_config.getMaxArrayLength() - p_config.getMinArrayLength() + 1) + p_config.getMinArrayLength();
+                    arrayLength = random.nextInt(config.getMaxArrayLength() - config.getMinArrayLength() + 1) + config.getMinArrayLength();
                     array = FieldUtil.allocateArray(fieldSpec, arrayLength);
                     for (j = 0; j < arrayLength; j++) {
                         object = FieldUtil.allocateComponent(fieldSpec);
-                        randomize(object, p_config, p_random);
+                        randomize(object, config, random);
                         UNSAFE.putObject(array, Constants.OBJECT_ARRAY_OFFSET + j * Constants.REFERENCE_SIZE, object);
                     }
-                    UNSAFE.putObject(p_object, fieldSpec.getOffset(), array);
+                    UNSAFE.putObject(instance, fieldSpec.getOffset(), array);
                     break;
 
                 default:
@@ -133,20 +131,20 @@ public class ObjectGenerator {
     }
 
     public static final class Config {
-        private final int m_minArrayLength;
-        private final int m_maxArrayLength;
+        private final int minArrayLength;
+        private final int maxArrayLength;
 
         public Config(int p_minArrayLength, int p_maxArrayLength) {
-            m_minArrayLength = p_minArrayLength;
-            m_maxArrayLength = p_maxArrayLength;
+            minArrayLength = p_minArrayLength;
+            maxArrayLength = p_maxArrayLength;
         }
 
         public int getMinArrayLength() {
-            return m_minArrayLength;
+            return minArrayLength;
         }
 
         public int getMaxArrayLength() {
-            return m_maxArrayLength;
+            return maxArrayLength;
         }
     }
 }

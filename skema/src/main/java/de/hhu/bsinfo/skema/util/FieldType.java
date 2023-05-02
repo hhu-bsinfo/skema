@@ -28,63 +28,63 @@ public enum FieldType {
     /**
      * The field type's unique identifier.
      */
-    private final int m_id;
+    private final int id;
 
     /**
      * The field type's name.
      */
-    private final String m_name;
+    private final String name;
 
     /**
      * Indicates if this type's size is constant.
      */
-    private final boolean m_hasConstantSize;
+    private final boolean hasConstantSize;
 
     /**
      * This types base offset.
      */
-    private final long m_baseOffset;
+    private final long baseOffset;
 
-    FieldType(final int p_id, final String p_name, final boolean p_hasConstantSize, final long p_baseOffset) {
-        m_id = p_id;
-        m_name = p_name;
-        m_hasConstantSize = p_hasConstantSize;
-        m_baseOffset = p_baseOffset;
+    FieldType(final int id, final String name, final boolean hasConstantSize, final long baseOffset) {
+        this.id = id;
+        this.name = name;
+        this.hasConstantSize = hasConstantSize;
+        this.baseOffset = baseOffset;
     }
 
     public String getName() {
-        return m_name;
+        return name;
     }
 
     public int getId() {
-        return m_id;
+        return id;
     }
 
     public long getBaseOffset() {
-        return m_baseOffset;
+        return baseOffset;
     }
 
     public boolean hasConstantSize() {
-        return m_hasConstantSize;
+        return hasConstantSize;
     }
 
-    public static FieldType fromClass(Class<?> p_class) {
-        if (p_class.isEnum()) {
+    public static FieldType fromClass(Class<?> clazz) {
+        if (clazz.isEnum()) {
             return ENUM;
         }
 
         for (FieldType fieldType : FieldType.values()) {
-            if (fieldType.m_name.equals(p_class.getCanonicalName())) {
+            if (fieldType.name.equals(clazz.getCanonicalName())) {
                 return fieldType;
             }
         }
 
-        return p_class.isArray() ? OBJECT_ARRAY : OBJECT;
+        return clazz.isArray() ? OBJECT_ARRAY : OBJECT;
     }
 
     @Override
     public String toString() {
-        return m_name;
+        return name;
     }
 
     private static final class HiddenField {}

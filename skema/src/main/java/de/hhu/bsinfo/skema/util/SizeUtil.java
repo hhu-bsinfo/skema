@@ -23,14 +23,14 @@ public final class SizeUtil {
 
     static {
         SIZE_FUNCTIONS[FieldType.OBJECT.getId()] = SizeUtil::getObjectSize;
-        SIZE_FUNCTIONS[FieldType.BYTE.getId()] = ((p_object, p_fieldSpec) -> Byte.BYTES);
-        SIZE_FUNCTIONS[FieldType.CHAR.getId()] = ((p_object, p_fieldSpec) -> Character.BYTES);
-        SIZE_FUNCTIONS[FieldType.SHORT.getId()] = ((p_object, p_fieldSpec) -> Short.BYTES);
-        SIZE_FUNCTIONS[FieldType.INT.getId()] = ((p_object, p_fieldSpec) -> Integer.BYTES);
-        SIZE_FUNCTIONS[FieldType.LONG.getId()] = ((p_object, p_fieldSpec) -> Long.BYTES);
-        SIZE_FUNCTIONS[FieldType.FLOAT.getId()] = ((p_object, p_fieldSpec) -> Float.BYTES);
-        SIZE_FUNCTIONS[FieldType.DOUBLE.getId()] = ((p_object, p_fieldSpec) -> Double.BYTES);
-        SIZE_FUNCTIONS[FieldType.BOOLEAN.getId()] = ((p_object, p_fieldSpec) -> Byte.BYTES);
+        SIZE_FUNCTIONS[FieldType.BYTE.getId()] = ((object, fieldSpec) -> Byte.BYTES);
+        SIZE_FUNCTIONS[FieldType.CHAR.getId()] = ((object, fieldSpec) -> Character.BYTES);
+        SIZE_FUNCTIONS[FieldType.SHORT.getId()] = ((object, fieldSpec) -> Short.BYTES);
+        SIZE_FUNCTIONS[FieldType.INT.getId()] = ((object, fieldSpec) -> Integer.BYTES);
+        SIZE_FUNCTIONS[FieldType.LONG.getId()] = ((object, fieldSpec) -> Long.BYTES);
+        SIZE_FUNCTIONS[FieldType.FLOAT.getId()] = ((object, fieldSpec) -> Float.BYTES);
+        SIZE_FUNCTIONS[FieldType.DOUBLE.getId()] = ((object, fieldSpec) -> Double.BYTES);
+        SIZE_FUNCTIONS[FieldType.BOOLEAN.getId()] = ((object, fieldSpec) -> Byte.BYTES);
         SIZE_FUNCTIONS[FieldType.CHAR_ARRAY.getId()] = SizeUtil::getArraySize;
         SIZE_FUNCTIONS[FieldType.BYTE_ARRAY.getId()] = SizeUtil::getArraySize;
         SIZE_FUNCTIONS[FieldType.SHORT_ARRAY.getId()] = SizeUtil::getArraySize;
@@ -40,14 +40,14 @@ public final class SizeUtil {
         SIZE_FUNCTIONS[FieldType.DOUBLE_ARRAY.getId()] = SizeUtil::getArraySize;
         SIZE_FUNCTIONS[FieldType.BOOLEAN_ARRAY.getId()] = SizeUtil::getArraySize;
         SIZE_FUNCTIONS[FieldType.OBJECT_ARRAY.getId()] = SizeUtil::getObjectArraySize;
-        SIZE_FUNCTIONS[FieldType.ENUM.getId()] = ((p_object, p_fieldSpec) -> Integer.BYTES);
-        SIZE_FUNCTIONS[FieldType.LENGTH.getId()] = ((p_object, p_fieldSpec) -> Integer.BYTES);
+        SIZE_FUNCTIONS[FieldType.ENUM.getId()] = ((object, fieldSpec) -> Integer.BYTES);
+        SIZE_FUNCTIONS[FieldType.LENGTH.getId()] = ((object, fieldSpec) -> Integer.BYTES);
     }
 
     private SizeUtil() {}
 
-    public static int getObjectArraySize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        Object[] array = (Object[]) FieldUtil.getObject(p_object, p_fieldSpec);
+    public static int getObjectArraySize(final Object instance, final Schema.FieldSpec fieldSpec) {
+        Object[] array = (Object[]) FieldUtil.getObject(instance, fieldSpec);
         Schema schema = SchemaRegistry.getSchema(array[0].getClass());
 
         if (schema.isConstant()) {
@@ -64,12 +64,12 @@ public final class SizeUtil {
     /**
      * Returns the size of an object in bytes.
      *
-     * @param p_object The parent object.
-     * @param p_fieldSpec The object's field specification.
+     * @param instance The parent object.
+     * @param fieldSpec The object's field specification.
      * @return The size in bytes.
      */
-    public static int getObjectSize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        Object object = FieldUtil.getObject(p_object, p_fieldSpec);
+    public static int getObjectSize(final Object instance, final Schema.FieldSpec fieldSpec) {
+        Object object = FieldUtil.getObject(instance, fieldSpec);
         Schema schema = SchemaRegistry.getSchema(object.getClass());
         return schema.getSize(object);
     }
@@ -77,59 +77,59 @@ public final class SizeUtil {
     /**
      * Returns the size of an array in bytes including the length field.
      *
-     * @param p_object The array.
-     * @param p_fieldSpec The field specification.
+     * @param instance The array.
+     * @param fieldSpec The field specification.
      * @return The array's size in bytes.
      */
-    public static int getArraySize(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        Object array = FieldUtil.getObject(p_object, p_fieldSpec);
-        return getArraySize(getArrayLength(array), p_fieldSpec);
+    public static int getArraySize(final Object instance, final Schema.FieldSpec fieldSpec) {
+        Object array = FieldUtil.getObject(instance, fieldSpec);
+        return getArraySize(getArrayLength(array), fieldSpec);
     }
 
-    public static int getArrayLength(final Object p_array) {
-        return UNSAFE.getInt(p_array, ARRAY_LENGTH_OFFSET);
+    public static int getArrayLength(final Object array) {
+        return UNSAFE.getInt(array, ARRAY_LENGTH_OFFSET);
     }
 
     /**
      * Returns the size of an array in bytes including the length field.
      *
-     * @param p_length The array's length.
-     * @param p_fieldSpec The array's field specification.
+     * @param length The array's length.
+     * @param fieldSpec The array's field specification.
      * @return The array's size in bytes.
      */
-    public static int getArraySize(final int p_length, final Schema.FieldSpec p_fieldSpec) {
-        switch (p_fieldSpec.getFieldType()) {
+    public static int getArraySize(final int length, final Schema.FieldSpec fieldSpec) {
+        switch (fieldSpec.getFieldType()) {
             case BYTE_ARRAY:
-                return p_length * Byte.BYTES;
+                return length * Byte.BYTES;
             case CHAR_ARRAY:
-                return p_length * Character.BYTES;
+                return length * Character.BYTES;
             case SHORT_ARRAY:
-                return p_length * Short.BYTES;
+                return length * Short.BYTES;
             case INT_ARRAY:
-                return p_length * Integer.BYTES;
+                return length * Integer.BYTES;
             case LONG_ARRAY:
-                return p_length * Long.BYTES;
+                return length * Long.BYTES;
             case FLOAT_ARRAY:
-                return p_length * Float.BYTES;
+                return length * Float.BYTES;
             case DOUBLE_ARRAY:
-                return p_length * Double.BYTES;
+                return length * Double.BYTES;
             case BOOLEAN_ARRAY:
-                return p_length * Byte.BYTES;
+                return length * Byte.BYTES;
             default:
-                throw new IllegalArgumentException(String.format("%s is not an array type", p_fieldSpec.getFieldType()));
+                throw new IllegalArgumentException(String.format("%s is not an array type", fieldSpec.getFieldType()));
         }
     }
 
-    public static int sizeOf(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        return SIZE_FUNCTIONS[p_fieldSpec.getFieldType().getId()].sizeOf(p_object, p_fieldSpec);
+    public static int sizeOf(final Object instance, final Schema.FieldSpec fieldSpec) {
+        return SIZE_FUNCTIONS[fieldSpec.getFieldType().getId()].sizeOf(instance, fieldSpec);
     }
 
-    public static int constantSizeOf(final Schema.FieldSpec p_fieldSpec) {
-        if (!p_fieldSpec.hasConstantSize()) {
+    public static int constantSizeOf(final Schema.FieldSpec fieldSpec) {
+        if (!fieldSpec.hasConstantSize()) {
             return NO_SIZE;
         }
 
-        return sizeOf(null, p_fieldSpec);
+        return sizeOf(null, fieldSpec);
     }
 
 }

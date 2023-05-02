@@ -20,17 +20,17 @@ public class Schema {
     /**
      * The class this schema describes.
      */
-    private final Class<?> m_class;
+    private final Class<?> schemaClass;
 
     /**
      * A sorted list containing all field specifications within this schema.
      */
-    private final Set<FieldSpec> m_fields = new TreeSet<>(Comparator.comparing(FieldSpec::getName));
+    private final Set<FieldSpec> schemaFields = new TreeSet<>(Comparator.comparing(FieldSpec::getName));
 
     /**
      * A cached iterator instance to prevent instance creation.
      */
-    private FieldSpec[] m_fieldArray = null;
+    private FieldSpec[] fieldCache = null;
 
     /**
      * The unsafe instance for schema generation.
@@ -40,17 +40,17 @@ public class Schema {
     /**
      * The constant size of the class this schema describes.
      */
-    private int m_constantSize = 0;
+    private int constantSize = 0;
 
     /**
      * Indicates if all fields contained within this schema and all children schemas have a constant size.
      */
-    private boolean m_isConstant = false;
+    private boolean isConstant = false;
 
     /**
      * All enum constants if this schema describes an enum.
      */
-    private final ArrayList<Enum> m_enumConstants = new ArrayList<>();
+    private final ArrayList<Enum> enumConstants = new ArrayList<>();
 
     /**
      * Creates a new Schema instance for the provided class.
@@ -58,68 +58,68 @@ public class Schema {
      * @param p_class The class described by this schema instance.
      */
     public Schema(final Class<?> p_class) {
-        m_class = p_class;
+        schemaClass = p_class;
     }
 
     /**
      * Adds a new field to this schema.
      *
-     * @param p_field The field to add.
+     * @param field The field to add.
      */
-    public void addField(final Field p_field) {
-        p_field.setAccessible(true);
+    public void addField(final Field field) {
+        field.setAccessible(true);
         FieldSpec fieldSpec = new FieldSpec(
-                FieldType.fromClass(p_field.getType()),
-                UNSAFE.objectFieldOffset(p_field),
-                p_field.getName(),
-                p_field);
+                FieldType.fromClass(field.getType()),
+                UNSAFE.objectFieldOffset(field),
+                field.getName(),
+                field);
 
         if (fieldSpec.hasConstantSize()) {
-            m_constantSize += SizeUtil.constantSizeOf(fieldSpec);
+            constantSize += SizeUtil.constantSizeOf(fieldSpec);
         }
 
-        m_fields.add(fieldSpec);
+        schemaFields.add(fieldSpec);
 
         if (fieldSpec.isArray()) {
-            m_constantSize += Integer.BYTES;
+            constantSize += Integer.BYTES;
         }
 
         onFieldsUpdated();
     }
 
-    public void addEnumConstant(final Enum p_enum) {
-        m_enumConstants.add(p_enum.ordinal(), p_enum);
+    public void addEnumConstant(final Enum constant) {
+        enumConstants.add(constant.ordinal(), constant);
     }
 
-    public Enum getEnumConstant(final int p_ordinal) {
-        return m_enumConstants.get(p_ordinal);
+    public Enum getEnumConstant(final int ordinal) {
+        return enumConstants.get(ordinal);
     }
 
     public int getEnumCount() {
-        return m_enumConstants.size();
+        return enumConstants.size();
     }
 
     /**
      * Called whenever the fields of this schema are updated.
      */
     private void onFieldsUpdated() {
-        int arrayCount = (int) m_fields.stream().filter(FieldSpec::isArray).count();
-        m_fieldArray = new FieldSpec[m_fields.size() + arrayCount];
+        int arrayCount = (int) schemaFields.stream().filter(FieldSpec::isArray).count();
+        fieldCache = new FieldSpec[schemaFields.size() + arrayCount];
 
         int i = 0;
-        for (FieldSpec spec : m_fields) {
+        for (FieldSpec spec : schemaFields) {
             if (spec.isArray()) {
-                m_fieldArray[i++] = new FieldSpec(
+                fieldCache[i++] = new FieldSpec(
                         FieldType.LENGTH,
                         spec.getOffset(),
                         FieldUtil.ARRAY_LENGTH_NAME,
                         spec.getField());
             }
 
-            m_fieldArray[i++] = spec;
+            fieldCache[i++] = spec;
         }
 
-        m_isConstant = m_fields.stream().allMatch(FieldSpec::hasConstantSize);
+        isConstant = schemaFields.stream().allMatch(FieldSpec::hasConstantSize);
     }
 
     @Override
@@ -127,18 +127,16 @@ public class Schema {
         StringBuilder builder = new StringBuilder();
 
         // Add header
-        builder.append(m_class.getCanonicalName()).append('\n');
+        builder.append(schemaClass.getCanonicalName()).append('\n');
 
         // Add rule below header
-        for (int i = 0; i < m_class.getCanonicalName().length(); i++) {
-            builder.append('-');
-        }
+        builder.append("-".repeat(schemaClass.getCanonicalName().length()));
 
         // Add newline after rule
         builder.append('\n');
 
         // Add each field specification
-        for (FieldSpec fieldSpec : m_fields) {
+        for (FieldSpec fieldSpec : schemaFields) {
             builder.append(fieldSpec).append('\n');
         }
 
@@ -151,40 +149,40 @@ public class Schema {
      * @return A set containing all field specifications within this schema.
      */
     public FieldSpec[] getFields() {
-        return m_fieldArray;
+        return fieldCache;
     }
 
     /**
      * Calculates an object's size using this schema.
      *
-     * @param p_object The object.
+     * @param instance The object.
      * @return The object's size in bytes.
      */
-    public int getSize(final Object p_object) {
-        if (m_isConstant) {
-            return m_constantSize;
+    public int getSize(final Object instance) {
+        if (isConstant) {
+            return constantSize;
         }
 
         int size = 0;
-        for (FieldSpec fieldSpec : m_fields) {
+        for (FieldSpec fieldSpec : schemaFields) {
             if (!fieldSpec.hasConstantSize()) {
-                size += SizeUtil.sizeOf(p_object, fieldSpec);
+                size += SizeUtil.sizeOf(instance, fieldSpec);
             }
         }
 
-        return size + m_constantSize;
+        return size + constantSize;
     }
 
     public boolean isConstant() {
-        return m_isConstant;
+        return isConstant;
     }
 
     public int getConstantSize() {
-        return m_constantSize;
+        return constantSize;
     }
 
     public Class<?> getTarget() {
-        return m_class;
+        return schemaClass;
     }
 
     /**
@@ -195,77 +193,78 @@ public class Schema {
         /**
          * The field's type.
          */
-        private final FieldType m_fieldType;
+        private final FieldType fieldType;
 
         /**
          * The field's offset within the class.
          */
-        private final long m_offset;
+        private final long offset;
 
         /**
          * The field's name.
          */
-        private final String m_name;
+        private final String name;
 
         /**
          * The field.
          */
-        private final Field m_field;
+        private final Field field;
 
         /**
          * The field's type.
          */
-        private final Class<?> m_type;
+        private final Class<?> type;
 
         /**
          * Indicates if this field is an enum.
          */
-        private final boolean m_isEnum;
+        private final boolean isEnum;
 
-        public FieldSpec(final FieldType p_type, final long p_offset, final String p_name, final Field p_field) {
-            m_fieldType = p_type;
-            m_offset = p_offset;
-            m_name = p_name;
-            m_field = p_field;
-            m_type = m_field.getType();
-            m_isEnum = m_type.isEnum();
+        public FieldSpec(final FieldType fieldType, final long offset, final String name, final Field field) {
+            this.fieldType = fieldType;
+            this.offset = offset;
+            this.name = name;
+            this.field = field;
+
+            type = this.field.getType();
+            isEnum = type.isEnum();
         }
 
         public FieldType getFieldType() {
-            return m_fieldType;
+            return fieldType;
         }
 
         public Class<?> getType() {
-            return m_type;
+            return type;
         }
 
         public long getOffset() {
-            return m_offset;
+            return offset;
         }
 
         public String getName() {
-            return m_name;
+            return name;
         }
 
         public Field getField() {
-            return m_field;
+            return field;
         }
 
         public boolean isEnum() {
-            return m_isEnum;
+            return isEnum;
         }
 
         public boolean hasConstantSize() {
-            return m_fieldType.hasConstantSize();
+            return fieldType.hasConstantSize();
         }
 
         @Override
         public String toString() {
-            return m_name;
+            return name;
         }
 
         public boolean isArray() {
-            return m_fieldType.getId() >= FieldType.BYTE_ARRAY.getId() && m_fieldType.getId() <= FieldType.OBJECT_ARRAY.getId();
+            return fieldType.getId() >= FieldType.BYTE_ARRAY.getId() && fieldType.getId() <= FieldType.OBJECT_ARRAY.getId();
         }
     }
 

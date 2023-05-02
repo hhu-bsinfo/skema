@@ -18,148 +18,148 @@ public final class Skema {
 
     private Skema() {}
 
-    public static byte[] serialize(final Object p_object) {
-        Schema schema = SchemaRegistry.getSchema(p_object.getClass());
-        byte[] buffer = new byte[schema.getSize(p_object)];
-        serialize(p_object, buffer);
+    public static byte[] serialize(final Object instance) {
+        Schema schema = SchemaRegistry.getSchema(instance.getClass());
+        byte[] buffer = new byte[schema.getSize(instance)];
+        serialize(instance, buffer);
         return buffer;
     }
 
-    public static int serialize(final Object p_object, final long p_address) {
-        return FullSerializer.serialize(p_object, p_address);
+    public static int serialize(final Object instance, final long address) {
+        return FullSerializer.serialize(instance, address);
     }
 
-    public static int serialize(final Object p_object, final byte[] p_buffer) {
-        return FullSerializer.serialize(p_object, p_buffer, 0);
+    public static int serialize(final Object instance, final byte[] buffer) {
+        return FullSerializer.serialize(instance, buffer, 0);
     }
 
-    public static void deserialize(final Object p_object, final byte[] p_buffer) {
-        FullDeserializer.deserialize(p_object, p_buffer, 0);
+    public static void deserialize(final Object instance, final byte[] buffer) {
+        FullDeserializer.deserialize(instance, buffer, 0);
     }
 
-    public static <T> T deserialize(final Class<T> p_class, final byte[] p_buffer) {
-        return deserialize(p_class, p_buffer, 0);
+    public static <T> T deserialize(final Class<T> clazz, final byte[] buffer) {
+        return deserialize(clazz, buffer, 0);
     }
 
-    public static <T> T deserialize(final Class<T> p_class, final long p_address) {
-        if (p_class.isEnum()) {
-            return FullDeserializer.deserializeEnum(p_class, p_address);
+    public static <T> T deserialize(final Class<T> clazz, final long address) {
+        if (clazz.isEnum()) {
+            return FullDeserializer.deserializeEnum(clazz, address);
         }
 
         try {
-            Object object = UNSAFE.allocateInstance(p_class);
-            FullDeserializer.deserialize(object, p_address);
-            return p_class.cast(object);
+            Object object = UNSAFE.allocateInstance(clazz);
+            FullDeserializer.deserialize(object, address);
+            return clazz.cast(object);
         } catch (InstantiationException e) {
             return null;
         }
     }
 
-    public static <T> T deserialize(final Class<T> p_class, final byte[] p_buffer, final int p_offset) {
-        if (p_class.isEnum()) {
-            return FullDeserializer.deserializeEnum(p_class, p_buffer, p_offset);
+    public static <T> T deserialize(final Class<T> clazz, final byte[] buffer, final int offset) {
+        if (clazz.isEnum()) {
+            return FullDeserializer.deserializeEnum(clazz, buffer, offset);
         }
 
         try {
-            Object object = UNSAFE.allocateInstance(p_class);
-            FullDeserializer.deserialize(object, p_buffer, p_offset);
-            return p_class.cast(object);
+            Object object = UNSAFE.allocateInstance(clazz);
+            FullDeserializer.deserialize(object, buffer, offset);
+            return clazz.cast(object);
         } catch (InstantiationException e) {
             return null;
         }
     }
 
-    public static int serialize(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
-        if (p_length == 0) {
+    public static int serialize(final Operation operation, final byte[] buffer, final int offset, final int length) {
+        if (length == 0) {
             return 0;
         }
 
         // Try to serialize an interrupted field first
         int totalBytes = 0;
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
-            totalBytes += PartialSerializer.serializeInterrupted(p_operation, p_buffer, p_offset, p_length);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += PartialSerializer.serializeInterrupted(operation, buffer, offset, length);
         }
 
         // Perform normal serialization if the interruption status has been cleared
-        if (p_operation.getStatus() == Operation.Status.NONE && p_length - totalBytes > 0) {
-            totalBytes += PartialSerializer.serializeNormal(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.NONE && length - totalBytes > 0) {
+            totalBytes += PartialSerializer.serializeNormal(operation, buffer, offset + totalBytes, length - totalBytes);
         }
 
         // Write interrupted field if normal serialization did not work
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED && p_length - totalBytes > 0) {
-            totalBytes += PartialSerializer.serializeInterrupted(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED && length - totalBytes > 0) {
+            totalBytes += PartialSerializer.serializeInterrupted(operation, buffer, offset + totalBytes, length - totalBytes);
         }
 
         return totalBytes;
     }
 
-    public static int serialize(final Operation p_operation, final long p_address, final int p_length) {
-        if (p_length == 0) {
+    public static int serialize(final Operation operation, final long address, final int length) {
+        if (length == 0) {
             return 0;
         }
 
         // Try to serialize an interrupted field first
         int totalBytes = 0;
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
-            totalBytes += PartialSerializer.serializeInterrupted(p_operation, p_address, p_length);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += PartialSerializer.serializeInterrupted(operation, address, length);
         }
 
         // Perform normal serialization if the interruption status has been cleared
-        if (p_operation.getStatus() == Operation.Status.NONE && p_length - totalBytes > 0) {
-            totalBytes += PartialSerializer.serializeNormal(p_operation, p_address + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.NONE && length - totalBytes > 0) {
+            totalBytes += PartialSerializer.serializeNormal(operation, address + totalBytes, length - totalBytes);
         }
 
         // Write interrupted field if normal serialization did not work
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED && p_length - totalBytes > 0) {
-            totalBytes += PartialSerializer.serializeInterrupted(p_operation, p_address + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED && length - totalBytes > 0) {
+            totalBytes += PartialSerializer.serializeInterrupted(operation, address + totalBytes, length - totalBytes);
         }
 
         return totalBytes;
     }
 
-    public static int deserialize(final Operation p_operation, final byte[] p_buffer, final int p_offset, final int p_length) {
-        if (p_length == 0) {
+    public static int deserialize(final Operation operation, final byte[] buffer, final int offset, final int length) {
+        if (length == 0) {
             return 0;
         }
 
         // Try to serialize an interrupted field first
         int totalBytes = 0;
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
-            totalBytes += PartialDeserializer.deserializeInterrupted(p_operation, p_buffer, p_offset, p_length);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += PartialDeserializer.deserializeInterrupted(operation, buffer, offset, length);
         }
 
         // Perform normal serialization if the interruption status has been cleared
-        if (p_operation.getStatus() == Operation.Status.NONE && p_length - totalBytes > 0) {
-            totalBytes += PartialDeserializer.deserializeNormal(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.NONE && length - totalBytes > 0) {
+            totalBytes += PartialDeserializer.deserializeNormal(operation, buffer, offset + totalBytes, length - totalBytes);
         }
 
         // Write interrupted field if normal serialization did not work
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED && p_length - totalBytes > 0) {
-            totalBytes += PartialDeserializer.deserializeInterrupted(p_operation, p_buffer, p_offset + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED && length - totalBytes > 0) {
+            totalBytes += PartialDeserializer.deserializeInterrupted(operation, buffer, offset + totalBytes, length - totalBytes);
         }
 
         return totalBytes;
     }
 
-    public static int deserialize(final Operation p_operation, final long p_address, final int p_length) {
-        if (p_length == 0) {
+    public static int deserialize(final Operation operation, final long address, final int length) {
+        if (length == 0) {
             return 0;
         }
 
         // Try to serialize an interrupted field first
         int totalBytes = 0;
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED) {
-            totalBytes += PartialDeserializer.deserializeInterrupted(p_operation, p_address, p_length);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED) {
+            totalBytes += PartialDeserializer.deserializeInterrupted(operation, address, length);
         }
 
         // Perform normal serialization if the interruption status has been cleared
-        if (p_operation.getStatus() == Operation.Status.NONE && p_length - totalBytes > 0) {
-            totalBytes += PartialDeserializer.deserializeNormal(p_operation, p_address + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.NONE && length - totalBytes > 0) {
+            totalBytes += PartialDeserializer.deserializeNormal(operation, address + totalBytes, length - totalBytes);
         }
 
         // Write interrupted field if normal serialization did not work
-        if (p_operation.getStatus() == Operation.Status.INTERRUPTED && p_length - totalBytes > 0) {
-            totalBytes += PartialDeserializer.deserializeInterrupted(p_operation, p_address + totalBytes, p_length - totalBytes);
+        if (operation.getStatus() == Operation.Status.INTERRUPTED && length - totalBytes > 0) {
+            totalBytes += PartialDeserializer.deserializeInterrupted(operation, address + totalBytes, length - totalBytes);
         }
 
         return totalBytes;
@@ -174,51 +174,51 @@ public final class Skema {
         SchemaRegistry.disableAutoRegistration();
     }
 
-    public static <T> T newInstance(Class<T> p_class) {
-        return ClassUtil.allocateInstance(p_class);
+    public static <T> T newInstance(Class<T> clazz) {
+        return ClassUtil.allocateInstance(clazz);
     }
 
-    public static <T> T newInstance(String p_class) {
-        return ClassUtil.allocateInstance(p_class);
+    public static <T> T newInstance(String clazz) {
+        return ClassUtil.allocateInstance(clazz);
     }
 
-    public static <T> T newInstance(final short p_identifier) { return ClassUtil.allocateInstance(SchemaRegistry.resolveClass(p_identifier)); }
+    public static <T> T newInstance(final short identifier) { return ClassUtil.allocateInstance(SchemaRegistry.resolveClass(identifier)); }
 
-    public static short resolveIdentifier(final Class<?> p_class) { return SchemaRegistry.resolveIdentifier(p_class); }
+    public static short resolveIdentifier(final Class<?> clazz) { return SchemaRegistry.resolveIdentifier(clazz); }
 
-    public static Schema register(Class<?> p_class) {
-        return SchemaRegistry.register(p_class);
+    public static Schema register(Class<?> clazz) {
+        return SchemaRegistry.register(clazz);
     }
 
-    public static int sizeOf(Object p_object) {
-        return SchemaRegistry.getSchema(p_object.getClass()).getSize(p_object);
+    public static int sizeOf(Object instance) {
+        return SchemaRegistry.getSchema(instance.getClass()).getSize(instance);
     }
 
-    public static long allocate(long p_size) {
-        return UNSAFE.allocateMemory(p_size);
+    public static long allocate(long size) {
+        return UNSAFE.allocateMemory(size);
     }
 
-    public static void free(long p_address) {
-        UNSAFE.freeMemory(p_address);
+    public static void free(long address) {
+        UNSAFE.freeMemory(address);
     }
 
-    public static Schema getSchema(Class<?> p_class) {
-        return SchemaRegistry.getSchema(p_class);
+    public static Schema getSchema(Class<?> clazz) {
+        return SchemaRegistry.getSchema(clazz);
     }
 
-    public static <T> T newRandomInstance(final Class<T> p_class) {
-        return ObjectGenerator.newInstance(p_class);
+    public static <T> T newRandomInstance(final Class<T> clazz) {
+        return ObjectGenerator.newInstance(clazz);
     }
 
-    public static <T> T newRandomInstance(final Class<T> p_class, final Random p_random) {
-        return ObjectGenerator.newInstance(p_class, p_random);
+    public static <T> T newRandomInstance(final Class<T> clazz, final Random random) {
+        return ObjectGenerator.newInstance(clazz, random);
     }
 
-    public static <T> T newRandomInstance(final Class<T> p_class, final ObjectGenerator.Config p_config) {
-        return ObjectGenerator.newInstance(p_class, p_config);
+    public static <T> T newRandomInstance(final Class<T> clazz, final ObjectGenerator.Config config) {
+        return ObjectGenerator.newInstance(clazz, config);
     }
 
-    public static <T> T newRandomInstance(final Class<T> p_class, final ObjectGenerator.Config p_config, final Random p_random) {
-        return ObjectGenerator.newInstance(p_class, p_config, p_random);
+    public static <T> T newRandomInstance(final Class<T> clazz, final ObjectGenerator.Config config, final Random random) {
+        return ObjectGenerator.newInstance(clazz, config, random);
     }
 }

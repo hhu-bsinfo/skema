@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="11">
       <module name="de.hhu.bsinfo.skema.examples.main" target="1.8" />
       <module name="de.hhu.bsinfo.skema.examples.test" target="1.8" />
       <module name="de.hhu.bsinfo.skema.jmh" target="1.8" />
@@ -10,6 +10,12 @@
       <module name="de.hhu.bsinfo.skema.skema.main" target="1.8" />
       <module name="de.hhu.bsinfo.skema.skema.test" target="1.8" />
       <module name="de.hhu.bsinfo.skema.test" target="1.8" />
+      <module name="skema.examples" target="20" />
+      <module name="skema.examples.main" target="20" />
+      <module name="skema.examples.test" target="20" />
+      <module name="skema.skema" target="20" />
+      <module name="skema.skema.main" target="20" />
+      <module name="skema.skema.test" target="20" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -9,36 +9,37 @@ import io.netty.channel.ChannelPromise;
 public class SkemaOutboundHandler extends ChannelOutboundHandlerAdapter {
 
     private static final int MESSAGE_HEADER_SIZE = Integer.BYTES + Short.BYTES;
-    private int m_payloadSize = 0;
-    private int m_writerIndex = 0;
-    private short m_type = 0;
+    private int payloadSize = 0;
+    private int writerIndex = 0;
+    private short type = 0;
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
-        System.out.println("WRITE");
-        m_type = Skema.resolveIdentifier(msg.getClass());
-        m_payloadSize = Skema.sizeOf(msg);
+    public void write(ChannelHandlerContext context, Object message, ChannelPromise promise) {
 
-        System.out.printf("Writing out type %d with size %d\n", m_type, m_payloadSize);
+        // Get the messages identifier and it's size using Skema
+        type = Skema.resolveIdentifier(message.getClass());
+        payloadSize = Skema.sizeOf(message);
 
-        ByteBuf buffer = ctx.alloc().directBuffer(m_payloadSize + MESSAGE_HEADER_SIZE);
-        buffer.writeInt(m_payloadSize);
-        buffer.writeShort(m_type);
+        // Allocate a direct buffer big enough to hold the header and the payload
+        ByteBuf buffer = context.alloc().directBuffer(payloadSize + MESSAGE_HEADER_SIZE);
 
-        System.out.println("Header written out");
+        // Write out the length and type information
+        buffer.writeInt(payloadSize);
+        buffer.writeShort(type);
 
-        m_writerIndex = buffer.writerIndex();
-        System.out.printf("Serializing. Writer index is at %d\n", m_writerIndex);
-        Skema.serialize(msg, buffer.memoryAddress() + m_writerIndex);
-        System.out.printf("Done. Setting writer index to %d\n", m_writerIndex + m_payloadSize);
-        buffer.writerIndex(m_writerIndex + m_payloadSize);
-        System.out.println("WRITE OUT");
-        ctx.writeAndFlush(buffer, promise);
+        // Remember the current writer index, write out data to native memory
+        // and adjust writer index according to the amount of written bytes
+        writerIndex = buffer.writerIndex();
+        Skema.serialize(message, buffer.memoryAddress() + writerIndex);
+        buffer.writerIndex(writerIndex + payloadSize);
+
+        // Write out the data
+        context.writeAndFlush(buffer, promise);
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+    public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
         cause.printStackTrace();
-        ctx.close();
+        context.close();
     }
 }

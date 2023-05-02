@@ -22,20 +22,20 @@ final class SchemaGenerator {
     /**
      * Generates a schema for the specified class.
      *
-     * @param p_class The class.
+     * @param clazz The class.
      * @return A schema for the specified class.
      */
-    public static Schema generate(Class<?> p_class) {
-        if (p_class.equals(Object.class)) {
-            throw new IllegalArgumentException(String.format("Generating schema for %s is not supported", p_class.getCanonicalName()));
+    public static Schema generate(Class<?> clazz) {
+        if (clazz.equals(Object.class)) {
+            throw new IllegalArgumentException(String.format("Generating schema for %s is not supported", clazz.getCanonicalName()));
         }
 
-        if (p_class.isEnum()) {
-            return generateEnumSchema(p_class);
+        if (clazz.isEnum()) {
+            return generateEnumSchema(clazz);
         }
 
-        Schema schema = new Schema(p_class);
-        Field[] fields = getAllFields(p_class);
+        Schema schema = new Schema(clazz);
+        Field[] fields = getAllFields(clazz);
         for (Field field : fields) {
             if ((field.getModifiers() & EXCLUDED_MODIFIERS) == 0) {
                 schema.addField(field);
@@ -45,15 +45,15 @@ final class SchemaGenerator {
         return schema;
     }
 
-    private static Schema generateEnumSchema(Class<?> p_class) {
-        Schema schema = new Schema(p_class);
+    private static Schema generateEnumSchema(Class<?> clazz) {
+        Schema schema = new Schema(clazz);
 
-        Enum[] enumConstants = getEnumConstants(p_class);
+        Enum[] enumConstants = getEnumConstants(clazz);
         for (Enum constant : enumConstants) {
             schema.addEnumConstant(constant);
         }
 
-        Field[] fields = getAllFields(p_class);
+        Field[] fields = getAllFields(clazz);
         for (Field field : fields) {
             if (field.getName().equals(ENUM_ORDINAL_FIELD)) {
                 schema.addField(field);
@@ -63,23 +63,23 @@ final class SchemaGenerator {
         return schema;
     }
 
-    static Field[] getAllFields(Class<?> p_class) {
+    static Field[] getAllFields(Class<?> clazz) {
         List<Field> fieldList = new ArrayList<>();
-        while(p_class != null) {
-            Field[] fields = p_class.getDeclaredFields();
+        while(clazz != null) {
+            Field[] fields = clazz.getDeclaredFields();
             fieldList.addAll(Arrays.asList(fields));
-            p_class = p_class.getSuperclass();
+            clazz = clazz.getSuperclass();
         }
         return fieldList.toArray(new Field[0]);
     }
 
-    static Enum[] getEnumConstants(Class<?> p_class) {
-        if (!p_class.isEnum()) {
+    static Enum[] getEnumConstants(Class<?> clazz) {
+        if (!clazz.isEnum()) {
             return null;
         }
 
         List<Enum> enumList = new ArrayList<>();
-        Field[] fields = p_class.getDeclaredFields();
+        Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
             if (Modifier.isStatic(field.getModifiers()) && !field.getName().equals(ENUM_VALUES_FIELD)) {
@@ -90,9 +90,9 @@ final class SchemaGenerator {
         return enumList.toArray(new Enum[0]);
     }
 
-    static Enum getEnumField(final Field p_field) {
+    static Enum getEnumField(final Field field) {
         try {
-            return (Enum) p_field.get(null);
+            return (Enum) field.get(null);
         } catch (IllegalAccessException e) {
             return null;
         }

@@ -19,86 +19,86 @@ public final class FieldUtil {
 
     private FieldUtil() {}
 
-    public static Object getObject(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        return UNSAFE.getObject(p_object, p_fieldSpec.getOffset());
+    public static Object getObject(final Object instance, final Schema.FieldSpec fieldSpec) {
+        return UNSAFE.getObject(instance, fieldSpec.getOffset());
     }
 
-    public static Object[] getArray(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        return (Object[]) getObject(p_object, p_fieldSpec);
+    public static Object[] getArray(final Object instance, final Schema.FieldSpec fieldSpec) {
+        return (Object[]) getObject(instance, fieldSpec);
     }
 
-    public static Object allocateInstance(final Schema.FieldSpec p_fieldSpec) {
+    public static Object allocateInstance(final Schema.FieldSpec fieldSpec) {
         try {
-            return UNSAFE.allocateInstance(p_fieldSpec.getType());
+            return UNSAFE.allocateInstance(fieldSpec.getType());
         } catch (InstantiationException e) {
-            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getType().getCanonicalName()));
+            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", fieldSpec.getType().getCanonicalName()));
         }
     }
 
-    public static Object[] allocateArray(final Schema.FieldSpec p_fieldSpec, final int p_length) {
-        return (Object[]) Array.newInstance(p_fieldSpec.getType().getComponentType(), p_length);
+    public static Object[] allocateArray(final Schema.FieldSpec fieldSpec, final int length) {
+        return (Object[]) Array.newInstance(fieldSpec.getType().getComponentType(), length);
     }
 
-    public static Object allocateComponent(final Schema.FieldSpec p_fieldSpec) {
+    public static Object allocateComponent(final Schema.FieldSpec fieldSpec) {
         try {
-            return UNSAFE.allocateInstance(p_fieldSpec.getType().getComponentType());
+            return UNSAFE.allocateInstance(fieldSpec.getType().getComponentType());
         } catch (InstantiationException p_e) {
-            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", p_fieldSpec.getType().getCanonicalName()));
+            throw new IllegalArgumentException(String.format("Couldn't create an instance of %s", fieldSpec.getType().getCanonicalName()));
         }
     }
 
-    public static Object getOrAllocateObject(final Object p_object, final Schema.FieldSpec p_fieldSpec) {
-        Object object = getObject(p_object, p_fieldSpec);
+    public static Object getOrAllocateObject(final Object instance, final Schema.FieldSpec fieldSpec) {
+        Object object = getObject(instance, fieldSpec);
         if (object == null) {
-            object = allocateInstance(p_fieldSpec);
-            UNSAFE.putObject(p_object, p_fieldSpec.getOffset(), object);
+            object = allocateInstance(fieldSpec);
+            UNSAFE.putObject(instance, fieldSpec.getOffset(), object);
         }
         return object;
     }
 
-    public static Object[] getOrAllocateArray(final Object p_object, final Schema.FieldSpec p_fieldSpec, final int p_length) {
-        Object[] object = getArray(p_object, p_fieldSpec);
+    public static Object[] getOrAllocateArray(final Object instance, final Schema.FieldSpec fieldSpec, final int length) {
+        Object[] object = getArray(instance, fieldSpec);
         if (object == null) {
-            object = allocateArray(p_fieldSpec, p_length);
-            UNSAFE.putObject(p_object, p_fieldSpec.getOffset(), object);
+            object = allocateArray(fieldSpec, length);
+            UNSAFE.putObject(instance, fieldSpec.getOffset(), object);
         }
         return object;
     }
 
-    public static Object getOrAllocateComponent(final Object[] p_array, final Schema.FieldSpec p_fieldSpec, final int p_index) {
-        Object object = p_array[p_index];
+    public static Object getOrAllocateComponent(final Object[] array, final Schema.FieldSpec fieldSpec, final int index) {
+        Object object = array[index];
         if (object == null) {
-            object = allocateComponent(p_fieldSpec);
-            p_array[p_index] = object;
+            object = allocateComponent(fieldSpec);
+            array[index] = object;
         }
         return object;
     }
 
-    public static Object randomArray(final Schema.FieldSpec p_fieldSpec, final int p_length, final Random p_random) {
-        if (!p_fieldSpec.isArray() || p_fieldSpec.getFieldType() == FieldType.OBJECT_ARRAY) {
+    public static Object randomArray(final Schema.FieldSpec fieldSpec, final int length, final Random random) {
+        if (!fieldSpec.isArray() || fieldSpec.getFieldType() == FieldType.OBJECT_ARRAY) {
             return null;
         }
 
         // Create an array and calculate its size in bytes
-        Object array = Array.newInstance(p_fieldSpec.getType().getComponentType(), p_length);
-        int size = SizeUtil.getArraySize(p_length, p_fieldSpec);
+        Object array = Array.newInstance(fieldSpec.getType().getComponentType(), length);
+        int size = SizeUtil.getArraySize(length, fieldSpec);
 
         // Create an array containing random bytes
         byte[] randomBytes = new byte[size];
-        p_random.nextBytes(randomBytes);
+        random.nextBytes(randomBytes);
 
         // Copy random bytes into target array
-        UNSAFE.copyMemory(randomBytes, 0, array, p_fieldSpec.getFieldType().getBaseOffset(), size);
+        UNSAFE.copyMemory(randomBytes, 0, array, fieldSpec.getFieldType().getBaseOffset(), size);
 
         return array;
     }
 
-    public static Object randomEnum(final Schema.FieldSpec p_fieldSpec, final Random p_random) {
-        return randomEnum(p_fieldSpec.getType(), p_random);
+    public static Object randomEnum(final Schema.FieldSpec fieldSpec, final Random random) {
+        return randomEnum(fieldSpec.getType(), random);
     }
 
-    public static Object randomEnum(final Class<?> p_class, final Random p_random) {
-        Schema schema = SchemaRegistry.getSchema(p_class);
-        return schema.getEnumConstant(p_random.nextInt(schema.getEnumCount()));
+    public static Object randomEnum(final Class<?> clazz, final Random random) {
+        Schema schema = SchemaRegistry.getSchema(clazz);
+        return schema.getEnumConstant(random.nextInt(schema.getEnumCount()));
     }
 }

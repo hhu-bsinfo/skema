@@ -1,16 +1,15 @@
 buildscript {
     repositories {
-        jcenter()
+        gradlePluginPortal()
     }
 }
 
-allprojects {
+subprojects {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 
 wrapper {
-    gradleVersion = "5.2"
+    gradleVersion = "8.1.1"
 }
-
