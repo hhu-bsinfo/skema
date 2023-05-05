@@ -7,6 +7,8 @@ import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.Operation;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
+import java.lang.foreign.MemorySegment;
+
 import static de.hhu.bsinfo.skema.util.OperationUtil.saveState;
 
 @SuppressWarnings("sunapi")
@@ -594,6 +596,10 @@ final class PartialDeserializer {
         return (int) (position - address);
     }
 
+    static int deserializeNormal(final Operation operation, final MemorySegment segment) {
+        return deserializeNormal(operation, segment.address(), (int) segment.byteSize());
+    }
+
     static int deserializeInterrupted(final Operation operation, final byte[] buffer, final int offset, final int length) {
         if (length == 0) {
             return 0;
@@ -734,6 +740,10 @@ final class PartialDeserializer {
         }
 
         return position - offset;
+    }
+
+    static int deserializeInterrupted(final Operation operation, final MemorySegment segment) {
+        return deserializeInterrupted(operation, segment.address(), (int) segment.byteSize());
     }
 
     static int deserializeInterrupted(final Operation operation, final long address, final int length) {
@@ -892,5 +902,9 @@ final class PartialDeserializer {
         Schema schema = SchemaRegistry.getSchema(fieldSpec.getType());
         final int ordinal = UNSAFE.getInt(address);
         return schema.getEnumConstant(ordinal);
+    }
+
+    static Object deserializeEnum(final Schema.FieldSpec fieldSpec, final MemorySegment segment) {
+        return deserializeEnum(fieldSpec, segment.address());
     }
 }

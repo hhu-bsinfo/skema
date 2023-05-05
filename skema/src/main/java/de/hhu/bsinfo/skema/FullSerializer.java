@@ -7,6 +7,8 @@ import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.SizeUtil;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
+import java.lang.foreign.MemorySegment;
+
 @SuppressWarnings("sunapi")
 final class FullSerializer {
 
@@ -288,6 +290,10 @@ final class FullSerializer {
         }
 
         return (int) (position - address);
+    }
+
+    int serialize(final Object object, final MemorySegment segment) {
+        return serialize(object, segment.address());
     }
 
 

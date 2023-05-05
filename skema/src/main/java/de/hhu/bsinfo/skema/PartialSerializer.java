@@ -8,6 +8,8 @@ import de.hhu.bsinfo.skema.util.Operation;
 import de.hhu.bsinfo.skema.util.SizeUtil;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
+import java.lang.foreign.MemorySegment;
+
 import static de.hhu.bsinfo.skema.util.OperationUtil.saveState;
 
 @SuppressWarnings("sunapi")
@@ -567,6 +569,10 @@ final class PartialSerializer {
         return (int) (position - address);
     }
 
+    static int serializeNormal(final Operation operation, final MemorySegment segment) {
+        return serializeNormal(operation, segment.address(), (int) segment.byteSize());
+    }
+
     static int serializeInterrupted(final Operation operation, final byte[] buffer, final int offset, final int length) {
         if (length == 0) {
             return 0;
@@ -797,5 +803,9 @@ final class PartialSerializer {
         }
 
         return (int) (position - address);
+    }
+
+    static int serializeInterrupted(final Operation operation, final MemorySegment segment) {
+        return serializeInterrupted(operation, segment.address(), (int) segment.byteSize());
     }
 }

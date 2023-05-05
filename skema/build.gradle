@@ -5,6 +5,9 @@ plugins {
 
     // Gradle java-library plugin
     id 'java-library'
+
+    // Jextract plugin
+    id "io.github.krakowski.jextract" version '0.4.1'
 }
 
 java {
@@ -12,6 +15,8 @@ java {
         languageVersion = JavaLanguageVersion.of(20)
     }
 }
+
+jextract.enabled = false
 
 group = 'de.hhu.bsinfo'
 version = '1.0.0' + (Boolean.valueOf(System.getProperty('release')) ? '' : '-SNAPSHOT')

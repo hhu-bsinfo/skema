@@ -6,6 +6,8 @@ import de.hhu.bsinfo.skema.util.Constants;
 import de.hhu.bsinfo.skema.util.FieldUtil;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
 
+import java.lang.foreign.MemorySegment;
+
 @SuppressWarnings("sunapi")
 final class FullDeserializer {
 
@@ -313,6 +315,10 @@ final class FullDeserializer {
         return (int) (position - address);
     }
 
+    static int deserialize(final Object instance, final MemorySegment segment) {
+        return deserialize(instance, segment.address());
+    }
+
     static <T> T deserializeEnum(final Class<T> clazz, final byte[] buffer) {
         return deserializeEnum(clazz, buffer, 0);
     }
@@ -329,6 +335,10 @@ final class FullDeserializer {
         return clazz.cast(schema.getEnumConstant(ordinal));
     }
 
+    static <T> T deserializeEnum(final Class<T> clazz, final MemorySegment segment) {
+        return deserializeEnum(clazz, segment.address());
+    }
+
     static Object deserializeEnum(final Schema.FieldSpec fieldSpec, final byte[] buffer, final int offset) {
         Schema schema = SchemaRegistry.getSchema(fieldSpec.getType());
         final int ordinal = UNSAFE.getInt(buffer, Constants.BYTE_ARRAY_OFFSET + offset);
@@ -339,5 +349,9 @@ final class FullDeserializer {
         Schema schema = SchemaRegistry.getSchema(fieldSpec.getType());
         final int ordinal = UNSAFE.getInt(address);
         return schema.getEnumConstant(ordinal);
+    }
+
+    static Object deserializeEnum(final Schema.FieldSpec fieldSpec, final MemorySegment segment) {
+        return deserializeEnum(fieldSpec, segment.address());
     }
 }

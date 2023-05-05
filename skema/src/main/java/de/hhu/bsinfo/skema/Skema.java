@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.skema;
 
+import java.lang.foreign.MemorySegment;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -33,8 +34,16 @@ public final class Skema {
         return FullSerializer.serialize(instance, buffer, 0);
     }
 
-    public static void deserialize(final Object instance, final byte[] buffer) {
-        FullDeserializer.deserialize(instance, buffer, 0);
+    public static int serialize(final Object instance, final MemorySegment segment) {
+        return FullSerializer.serialize(instance, segment.address());
+    }
+
+    public static int deserialize(final Object instance, final byte[] buffer) {
+        return FullDeserializer.deserialize(instance, buffer, 0);
+    }
+
+    public static int deserialize(final Object instance, final long address) {
+        return FullDeserializer.deserialize(instance, address);
     }
 
     public static <T> T deserialize(final Class<T> clazz, final byte[] buffer) {
@@ -67,6 +76,14 @@ public final class Skema {
         } catch (InstantiationException e) {
             return null;
         }
+    }
+
+    public static <T> T deserialize(final Class<T> clazz, final MemorySegment segment) {
+        return deserialize(clazz, segment.address());
+    }
+
+    public static int deserialize(final Object instance, final MemorySegment segment) {
+       return deserialize(instance, segment.address());
     }
 
     public static int serialize(final Operation operation, final byte[] buffer, final int offset, final int length) {
@@ -117,6 +134,10 @@ public final class Skema {
         return totalBytes;
     }
 
+    public static int serialize(final Operation operation, final MemorySegment segment, final int length) {
+        return serialize(operation, segment.address(), length);
+    }
+
     public static int deserialize(final Operation operation, final byte[] buffer, final int offset, final int length) {
         if (length == 0) {
             return 0;
@@ -163,6 +184,10 @@ public final class Skema {
         }
 
         return totalBytes;
+    }
+
+    public static int deserialize(final Operation operation, final MemorySegment segment, final int length) {
+        return deserialize(operation, segment.address(), length);
     }
 
 

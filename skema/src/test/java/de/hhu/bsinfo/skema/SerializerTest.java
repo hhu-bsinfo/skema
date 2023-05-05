@@ -1,5 +1,7 @@
 package de.hhu.bsinfo.skema;
 
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentScope;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +72,15 @@ public class SerializerTest {
     }
 
     @Test
+    public void testFullSegment() {
+        int size = Skema.sizeOf(expected);
+        var segment = MemorySegment.allocateNative(size, SegmentScope.auto());
+        Skema.serialize(expected, segment);
+        Object object = Skema.deserialize(expected.getClass(), segment);
+        assertEquals(expected, object);
+    }
+
+    @Test
     public void testPartialOnHeap() {
         int size = Skema.sizeOf(expected);
         byte[] buffer = new byte[size];
@@ -105,6 +116,25 @@ public class SerializerTest {
         }
 
         Skema.free(address);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPartialSegment() {
+        int size = Skema.sizeOf(expected);
+        var segment = MemorySegment.allocateNative(size, SegmentScope.auto());
+
+        Operation serializerOperation = new Operation(expected);
+        for (int i = 0; i < size; i++) {
+            Skema.serialize(serializerOperation, segment.asSlice(i), 1);
+        }
+
+        Object actual = Skema.newInstance(expected.getClass());
+        Operation deserializerOperation = new Operation(actual);
+        for (int i = 0; i < size; i++) {
+            Skema.deserialize(deserializerOperation, segment.asSlice(i), 1);
+        }
 
         assertEquals(expected, actual);
     }

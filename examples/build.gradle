@@ -1,5 +1,8 @@
 plugins {
     id 'application'
+
+    // Jextract plugin
+    id "io.github.krakowski.jextract" version '0.4.1'
 }
 
 java {
@@ -7,6 +10,8 @@ java {
         languageVersion = JavaLanguageVersion.of(20)
     }
 }
+
+jextract.enabled = false
 
 group = 'de.hhu.bsinfo.skema'
 
