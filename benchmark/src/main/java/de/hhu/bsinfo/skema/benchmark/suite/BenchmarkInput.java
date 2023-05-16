@@ -1,15 +1,14 @@
-package de.hhu.bsinfo.skema;
+package de.hhu.bsinfo.skema.benchmark.suite;
+
+import de.hhu.bsinfo.skema.Skema;
+import de.hhu.bsinfo.skema.benchmark.data.BoxedCollection;
+import de.hhu.bsinfo.skema.benchmark.data.PrimitiveCollection;
+import de.hhu.bsinfo.skema.benchmark.data.Result;
+import de.hhu.bsinfo.skema.benchmark.data.TextMessage;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-
-import de.hhu.bsinfo.skema.data.*;
-import de.hhu.bsinfo.skema.data.BoxedCollection;
-import de.hhu.bsinfo.skema.data.Measurement;
-import de.hhu.bsinfo.skema.data.PrimitiveCollection;
-import de.hhu.bsinfo.skema.data.Result;
-import de.hhu.bsinfo.skema.data.Status;
 
 public class BenchmarkInput {
 

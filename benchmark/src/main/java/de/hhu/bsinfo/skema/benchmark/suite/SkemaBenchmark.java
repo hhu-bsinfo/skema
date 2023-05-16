@@ -1,28 +1,13 @@
-package de.hhu.bsinfo.skema;
-
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+package de.hhu.bsinfo.skema.benchmark.suite;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.UnsafeInput;
-import com.esotericsoftware.kryo.io.UnsafeOutput;
-
-import de.hhu.bsinfo.skema.data.*;
-import org.openjdk.jmh.annotations.*;
-
-import de.hhu.bsinfo.skema.data.BoxedCollection;
-import de.hhu.bsinfo.skema.data.PrimitiveCollection;
-import de.hhu.bsinfo.skema.data.Result;
-import de.hhu.bsinfo.skema.data.Status;
+import com.esotericsoftware.kryo.unsafe.UnsafeInput;
+import com.esotericsoftware.kryo.unsafe.UnsafeOutput;
+import de.hhu.bsinfo.skema.Skema;
+import de.hhu.bsinfo.skema.benchmark.data.*;
 import de.hhu.bsinfo.skema.util.Operation;
 import de.hhu.bsinfo.skema.util.UnsafeProvider;
-
-import org.openjdk.jmh.results.format.ResultFormatType;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.annotations.*;
 
 public class SkemaBenchmark {
 
@@ -33,12 +18,7 @@ public class SkemaBenchmark {
     private static final boolean ASSERT = false;
 
     static {
-        Skema.register(PrimitiveCollection.class);
-        Skema.register(BoxedCollection.class);
-        Skema.register(Result.class);
-        Skema.register(Status.class);
-        Skema.register(TextMessage.class);
-        Skema.register(Message.class);
+        Skema.enableAutoRegistration();
     }
 
     @State(Scope.Thread)
@@ -59,11 +39,12 @@ public class SkemaBenchmark {
 
         @Setup(Level.Trial)
         public void setup() {
+            kryo.setRegistrationRequired(false);
             data = dataSource.get(type);
             dataClass = data.getClass();
             kryo.writeObject(output, data);
             input = new UnsafeInput(output.getBuffer());
-            output.clear();
+            output.reset();
         }
 
         @TearDown(Level.Trial)
@@ -191,14 +172,14 @@ public class SkemaBenchmark {
     @Benchmark
     public byte[] serializeKryo(KryoState p_state) {
         p_state.kryo.writeObject(p_state.output, p_state.data);
-        p_state.output.clear();
+        p_state.output.reset();
         return p_state.output.getBuffer();
     }
 
     @Benchmark
     public Object deserializeKryo(KryoState p_state) {
         p_state.data = p_state.kryo.readObject(p_state.input, p_state.dataClass);
-        p_state.input.rewind();
+        p_state.input.reset();
         return p_state.data;
     }
 
@@ -241,27 +222,5 @@ public class SkemaBenchmark {
             System.out.println("##############################################################");
             System.out.println();
         }
-    }
-
-    public static void main(String[] p_args) throws RunnerException {
-        Options options = new OptionsBuilder()
-                .include(SkemaBenchmark.class.getSimpleName())
-                .warmupIterations(3)
-                .warmupTime(TimeValue.seconds(5))
-                .measurementIterations(5)
-                .measurementTime(TimeValue.seconds(10))
-                .threads(24)
-                .forks(5)
-                .mode(Mode.Throughput)
-                .timeUnit(TimeUnit.SECONDS)
-                .resultFormat(ResultFormatType.CSV)
-                .result("skema_result.csv")
-                .build();
-
-        printWarning();
-
-        new Runner(options).run();
-
-        printWarning();
     }
 }
