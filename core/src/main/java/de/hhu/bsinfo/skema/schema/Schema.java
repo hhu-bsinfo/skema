@@ -1,10 +1,7 @@
 package de.hhu.bsinfo.skema.schema;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import de.hhu.bsinfo.skema.util.FieldType;
 import de.hhu.bsinfo.skema.util.FieldUtil;
@@ -25,7 +22,7 @@ public class Schema {
     /**
      * A sorted list containing all field specifications within this schema.
      */
-    private final Set<FieldSpec> schemaFields = new TreeSet<>(Comparator.comparing(FieldSpec::getName));
+    private final Set<FieldSpec> schemaFields = new HashSet<>();
 
     /**
      * A cached iterator instance to prevent instance creation.
@@ -265,6 +262,11 @@ public class Schema {
 
         public boolean isArray() {
             return fieldType.getId() >= FieldType.BYTE_ARRAY.getId() && fieldType.getId() <= FieldType.OBJECT_ARRAY.getId();
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
         }
     }
 
