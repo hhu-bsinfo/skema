@@ -30,6 +30,15 @@
       <module name="de.hhu.bsinfo.skema.skema.main" target="1.8" />
       <module name="de.hhu.bsinfo.skema.skema.test" target="1.8" />
       <module name="de.hhu.bsinfo.skema.test" target="1.8" />
+      <module name="skema.benchmark" target="20" />
+      <module name="skema.benchmark.main" target="20" />
+      <module name="skema.benchmark.test" target="20" />
+      <module name="skema.core" target="20" />
+      <module name="skema.core.main" target="20" />
+      <module name="skema.core.test" target="20" />
+      <module name="skema.examples" target="20" />
+      <module name="skema.examples.main" target="20" />
+      <module name="skema.examples.test" target="20" />
       <module name="skema.skema" target="20" />
       <module name="skema.skema.main" target="20" />
       <module name="skema.skema.test" target="20" />
