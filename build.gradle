@@ -16,6 +16,7 @@ ext {
 
     // Serialization
     kryoVersion = '5.5.0'
+    fstVersion = '3.0.1'
 
     // Testing
     junitJupiterVersion = '5.8.2'

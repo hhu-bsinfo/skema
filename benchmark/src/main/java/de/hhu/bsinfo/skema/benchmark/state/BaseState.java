@@ -1,11 +1,14 @@
 package de.hhu.bsinfo.skema.benchmark.state;
 
 import de.hhu.bsinfo.skema.Skema;
-import de.hhu.bsinfo.skema.benchmark.data.PrimitiveCollection;
+import de.hhu.bsinfo.skema.benchmark.data.BenchmarkObject;
 import de.hhu.bsinfo.skema.benchmark.util.Constants;
 import de.hhu.bsinfo.skema.benchmark.util.MemoryType;
 import org.openjdk.jmh.annotations.*;
 
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 import static de.hhu.bsinfo.skema.benchmark.util.Constants.MemoryType.OFF_HEAP;
@@ -29,16 +32,23 @@ public abstract class BaseState {
 
     @Setup(Level.Trial)
     public void setup() {
-        data = Skema.newRandomInstance(PrimitiveCollection.class, random);
+
+        // Prepare random instance of our benchmark object
+        data = Skema.newRandomInstance(BenchmarkObject.class, random);
+
+        // Store the benchmark object's class
         dataClass = data.getClass();
+
+        // Convert string param into enum
         memoryTarget = fromString(memoryType);
 
-        onSetup();
+        // Call setup method of subclass
+        onSetup(data);
     }
 
     @TearDown(Level.Trial)
     public void teardown() {
-
+        // Nothing to do here
     }
 
     public long serialize() {
@@ -63,11 +73,11 @@ public abstract class BaseState {
 
     protected abstract Object deserializeOffHeap(Class<?> clazz);
 
-    protected abstract void onSetup();
+    protected abstract void onSetup(Object benchmarkObject);
 
     protected abstract void onTeardown();
 
-    private static final MemoryType fromString(String memoryType) {
+    private static MemoryType fromString(String memoryType) {
         return switch (memoryType) {
             case ON_HEAP -> MemoryType.ON_HEAP;
             case OFF_HEAP -> MemoryType.OFF_HEAP;

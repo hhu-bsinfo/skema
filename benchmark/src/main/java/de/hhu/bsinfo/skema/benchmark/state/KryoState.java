@@ -7,16 +7,18 @@ import com.esotericsoftware.kryo.unsafe.UnsafeInput;
 import com.esotericsoftware.kryo.unsafe.UnsafeOutput;
 import de.hhu.bsinfo.skema.benchmark.util.Constants;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.SegmentScope;
 import java.nio.ByteBuffer;
 
 public class KryoState extends BaseState {
 
-    private static final MemorySegment BASE_MEMORY = MemorySegment.allocateNative(
-            Constants.STATIC_BUFFER_SIZE, Constants.MEMORY_ALIGNMENT, SegmentScope.global());
+    private final Arena arena = Arena.openConfined();
 
-    private static final ByteBuffer BYTE_BUFFER = BASE_MEMORY.asByteBuffer();
+    private final MemorySegment baseSegment = MemorySegment.allocateNative(
+            Constants.STATIC_BUFFER_SIZE, Constants.MEMORY_ALIGNMENT, arena.scope());
+
+    private final ByteBuffer byteBuffer = baseSegment.asByteBuffer();
 
     public final Kryo kryo = new Kryo();
 
@@ -38,40 +40,41 @@ public class KryoState extends BaseState {
 
         // Prepare off-heap output
         offHeapOutput = new UnsafeByteBufferOutput();
-        offHeapOutput.setBuffer(BYTE_BUFFER, Constants.STATIC_BUFFER_SIZE);
+        offHeapOutput.setBuffer(byteBuffer, Constants.STATIC_BUFFER_SIZE);
 
         // Prepare off-heap input
         offHeapInput = new UnsafeByteBufferInput(offHeapOutput.getByteBuffer());
     }
 
     @Override
-    protected void onSetup() {
+    protected void onSetup(Object benchmarkObject) {
         kryo.setRegistrationRequired(false);
+
+        // Fill inputs with dummy data for deserialization
+        kryo.writeObject(onHeapOutput, benchmarkObject);
+        kryo.writeObject(offHeapOutput, benchmarkObject);
     }
 
     @Override
     protected void onTeardown() {
-        offHeapOutput.dispose();
+        // Release memory
+        arena.close();
     }
 
     @Override
     protected long serializeOnHeap(Object object) {
+        onHeapOutput.reset();
         kryo.writeObject(onHeapOutput, object);
 
-        var total = onHeapOutput.total();
-        onHeapOutput.reset();
-
-        return total;
+        return onHeapOutput.total();
     }
 
     @Override
     protected long serializeOffHeap(Object object) {
+        offHeapOutput.reset();
         kryo.writeObject(offHeapOutput, object);
 
-        var total = offHeapOutput.total();
-        offHeapOutput.reset();
-
-        return total;
+        return offHeapOutput.total();
     }
 
     @Override

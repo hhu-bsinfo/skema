@@ -3,26 +3,31 @@ package de.hhu.bsinfo.skema.benchmark.state;
 import de.hhu.bsinfo.skema.Skema;
 import de.hhu.bsinfo.skema.benchmark.util.Constants;
 
+import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentScope;
 
 public class SkemaState extends BaseState {
 
-    private static final MemorySegment BASE_MEMORY = MemorySegment.allocateNative(
-            Constants.STATIC_BUFFER_SIZE, Constants.MEMORY_ALIGNMENT, SegmentScope.global());
+    private final Arena arena = Arena.openConfined();
+
+    private final MemorySegment baseSegment = MemorySegment.allocateNative(
+            Constants.STATIC_BUFFER_SIZE, Constants.MEMORY_ALIGNMENT, arena.scope());
 
     private final byte[] onHeapBuffer = new byte[Constants.STATIC_BUFFER_SIZE];
 
-    private final long offHeapBuffer = BASE_MEMORY.address();
+    private final long offHeapBuffer = baseSegment.address();
 
     @Override
-    protected void onSetup() {
-        Skema.enableAutoRegistration();
+    protected void onSetup(Object benchmarkObject) {
+        // Fill buffers with dummy data for deserialization
+        Skema.serialize(benchmarkObject, onHeapBuffer);
+        Skema.serialize(benchmarkObject, offHeapBuffer);
     }
 
     @Override
     protected void onTeardown() {
-        Skema.free(offHeapBuffer);
+        arena.close();
     }
 
     @Override
