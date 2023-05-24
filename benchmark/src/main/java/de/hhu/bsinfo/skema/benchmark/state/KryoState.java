@@ -7,22 +7,42 @@ import com.esotericsoftware.kryo.unsafe.UnsafeInput;
 import com.esotericsoftware.kryo.unsafe.UnsafeOutput;
 import de.hhu.bsinfo.skema.benchmark.util.Constants;
 
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentScope;
+import java.nio.ByteBuffer;
+
 public class KryoState extends BaseState {
+
+    private static final MemorySegment BASE_MEMORY = MemorySegment.allocateNative(
+            Constants.STATIC_BUFFER_SIZE, Constants.MEMORY_ALIGNMENT, SegmentScope.global());
+
+    private static final ByteBuffer BYTE_BUFFER = BASE_MEMORY.asByteBuffer();
 
     public final Kryo kryo = new Kryo();
 
-    public final UnsafeOutput onHeapOutput = new UnsafeOutput(
-            Constants.STATIC_BUFFER_SIZE, Constants.STATIC_BUFFER_SIZE
-    );
+    public final UnsafeOutput onHeapOutput;
+    public final UnsafeInput onHeapInput;
 
-    public final UnsafeInput onHeapInput = new UnsafeInput(onHeapOutput.getBuffer());
+    private final UnsafeByteBufferOutput offHeapOutput;
+    private final UnsafeByteBufferInput offHeapInput;
 
-    public final UnsafeByteBufferOutput offHeapOutput = new UnsafeByteBufferOutput(
-            Constants.STATIC_BUFFER_SIZE, Constants.STATIC_BUFFER_SIZE
-    );
+    public KryoState() {
 
-    public final UnsafeByteBufferInput offHeapInput = new UnsafeByteBufferInput(offHeapOutput.getByteBuffer());
+        // Prepare on-heap output
+        onHeapOutput = new UnsafeOutput(
+                Constants.STATIC_BUFFER_SIZE, Constants.STATIC_BUFFER_SIZE
+        );
 
+        // Prepare on-heap input
+        onHeapInput = new UnsafeInput(onHeapOutput.getBuffer());
+
+        // Prepare off-heap output
+        offHeapOutput = new UnsafeByteBufferOutput();
+        offHeapOutput.setBuffer(BYTE_BUFFER, Constants.STATIC_BUFFER_SIZE);
+
+        // Prepare off-heap input
+        offHeapInput = new UnsafeByteBufferInput(offHeapOutput.getByteBuffer());
+    }
 
     @Override
     protected void onSetup() {
@@ -36,18 +56,22 @@ public class KryoState extends BaseState {
 
     @Override
     protected long serializeOnHeap(Object object) {
-        onHeapOutput.reset();
         kryo.writeObject(onHeapOutput, object);
 
-        return onHeapOutput.total();
+        var total = onHeapOutput.total();
+        onHeapOutput.reset();
+
+        return total;
     }
 
     @Override
     protected long serializeOffHeap(Object object) {
-        offHeapOutput.reset();
         kryo.writeObject(offHeapOutput, object);
 
-        return offHeapOutput.total();
+        var total = offHeapOutput.total();
+        offHeapOutput.reset();
+
+        return total;
     }
 
     @Override

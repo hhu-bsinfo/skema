@@ -1,8 +1,9 @@
 package de.hhu.bsinfo.skema.benchmark.data;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class PrimitiveCollection {
+public class PrimitiveCollection implements Serializable {
 
     private final byte m_byte = 0x42;
 

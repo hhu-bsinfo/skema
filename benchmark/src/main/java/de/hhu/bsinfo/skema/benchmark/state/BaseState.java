@@ -1,21 +1,22 @@
 package de.hhu.bsinfo.skema.benchmark.state;
 
 import de.hhu.bsinfo.skema.Skema;
-import de.hhu.bsinfo.skema.benchmark.util.BenchmarkInput;
+import de.hhu.bsinfo.skema.benchmark.data.PrimitiveCollection;
 import de.hhu.bsinfo.skema.benchmark.util.Constants;
 import de.hhu.bsinfo.skema.benchmark.util.MemoryType;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.Random;
 
-import static de.hhu.bsinfo.skema.benchmark.util.Constants.DataType.*;
-import static de.hhu.bsinfo.skema.benchmark.util.Constants.MemoryType.*;
+import static de.hhu.bsinfo.skema.benchmark.util.Constants.MemoryType.OFF_HEAP;
+import static de.hhu.bsinfo.skema.benchmark.util.Constants.MemoryType.ON_HEAP;
 
 @State(Scope.Thread)
 public abstract class BaseState {
 
-    @Param({PRIMITIVE, BOXED, POLYMORPHIC, ENUM})
-    public String dataType;
+    static {
+        Skema.enableAutoRegistration();
+    }
 
     @Param({ON_HEAP, OFF_HEAP})
     public String memoryType;
@@ -24,13 +25,11 @@ public abstract class BaseState {
     public Class<?> dataClass;
     private MemoryType memoryTarget;
 
-    private final BenchmarkInput dataSource = new BenchmarkInput(Constants.BENCHMARK_SEED);
-
     private final Random random = new Random(Constants.BENCHMARK_SEED);
 
     @Setup(Level.Trial)
     public void setup() {
-        data = dataSource.get(dataType);
+        data = Skema.newRandomInstance(PrimitiveCollection.class, random);
         dataClass = data.getClass();
         memoryTarget = fromString(memoryType);
 
